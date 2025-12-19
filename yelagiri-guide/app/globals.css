@@ -1,0 +1,136 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 20, 30, 20;
+  /* Dark green-tinted text */
+  --background-start-rgb: 255, 255, 255;
+  /* White */
+  --background-end-rgb: 240, 253, 244;
+  /* Very light green - Moss */
+  --primary-forest: #2d5016;
+  /* Deep Forest Green */
+  --accent-emerald: #10b981;
+  /* Vibrant Emerald */
+  --accent-sage: #a3b18a;
+  /* Sage Green */
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb)));
+  min-height: 100vh;
+  font-family: var(--font-sans);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-slideIn {
+  animation: slideIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Nature-Inspired Green Gradients */
+.gradient-hotels {
+  background: linear-gradient(135deg, #2d5016 0%, #10b981 100%);
+  /* Forest Green to Emerald */
+}
+
+.gradient-spots {
+  background: linear-gradient(135deg, #84cc16 0%, #10b981 100%);
+  /* Lime to Emerald */
+}
+
+.gradient-restaurants {
+  background: linear-gradient(135deg, #92400e 0%, #f59e0b 100%);
+  /* Earth Brown to Amber - keeping food warmth */
+}
+
+.gradient-emergency {
+  background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
+  /* Soft Red - safety priority */
+}
+
+.gradient-activities {
+  background: linear-gradient(135deg, #14b8a6 0%, #84cc16 100%);
+  /* Teal to Lime */
+}
+
+.gradient-shopping {
+  background: linear-gradient(135deg, #a3b18a 0%, #6ee7b7 100%);
+  /* Sage to Mint */
+}
+
+/* Glass morphism effect with green tint */
+.glass {
+  background: rgba(16, 185, 129, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+/* Hover effects */
+.hover-lift:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
