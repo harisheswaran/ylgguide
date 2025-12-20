@@ -73,116 +73,76 @@ export default function Home() {
       <main>
         {/* Hero Section */}
         <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
-          {/* Greenery Background Image */}
+          {/* Misty Forest Background Image */}
           <div className="absolute inset-0 z-0">
             <Image
-              src="/greenery-bg.png"
-              alt="Lush greenery background"
+              src="/misty-forest.png"
+              alt="Misty forest background"
               fill
               className="object-cover"
               priority
             />
-            {/* Dark overlay for better text readability */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40"></div>
-          </div>
-
-          {/* Animated Overlay */}
-          <motion.div
-            className="absolute inset-0 z-0 opacity-20"
-            animate={{
-              background: [
-                "radial-gradient(circle at 0% 0%, #10b981 0%, transparent 50%)",
-                "radial-gradient(circle at 100% 0%, #6ee7b7 0%, transparent 50%)",
-                "radial-gradient(circle at 100% 100%, #84cc16 0%, transparent 50%)",
-                "radial-gradient(circle at 0% 100%, #10b981 0%, transparent 50%)",
-                "radial-gradient(circle at 0% 0%, #10b981 0%, transparent 50%)",
-              ],
-            }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          />
-
-          {/* Floating Elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <motion.div
-              animate={{ y: [-20, 20, -20], x: [-10, 10, -10] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-1/4 left-1/4 w-64 h-64 bg-forest-300/20 rounded-full blur-3xl"
-            />
-            <motion.div
-              animate={{ y: [20, -20, 20], x: [10, -10, 10] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-mint-300/20 rounded-full blur-3xl"
-            />
+            {/* Gradient overlay for better text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50"></div>
           </div>
 
           <div className="relative z-10 text-center px-4 max-w-5xl mx-auto">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="mb-6 inline-block"
-            >
-              <span className="px-4 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-white/60 text-forest-800 text-sm font-bold shadow-sm flex items-center gap-2">
-                <span className="animate-pulse">✨</span> Discover the Jewel of the South
-              </span>
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
-              className="text-6xl md:text-8xl font-black tracking-tight mb-6 text-slate-800"
-            >
-              <span className="bg-gradient-to-r from-white to-mint-100 bg-clip-text text-transparent drop-shadow-lg">Yelagiri</span> <span className="text-white drop-shadow-lg">Hills.</span>
-            </motion.h1>
+            {/* Trip to Nature - Script Font */}
             <motion.p
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-              className="text-2xl md:text-3xl text-white font-medium tracking-wide mb-12 drop-shadow-lg"
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="text-3xl md:text-4xl text-white italic mb-4"
+              style={{ fontFamily: 'var(--font-satisfy)' }}
             >
-              Nature. Adventure. Serenity.
+              Trip to Nature
             </motion.p>
 
+            {/* YELAGIRI - Large Condensed Title */}
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+              className="text-7xl md:text-9xl font-bold tracking-wider mb-6 text-white uppercase"
+              style={{ fontFamily: 'var(--font-oswald)', fontWeight: 700 }}
+            >
+              YELAGIRI
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              className="text-lg md:text-xl text-white/90 font-light tracking-wide mb-12"
+            >
+              Discover the hidden gem of Tamil Nadu
+            </motion.p>
+
+            {/* BOOK YOUR TRIP - Outline Button */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-6 justify-center"
+              transition={{ duration: 0.8, delay: 0.6 }}
             >
               <motion.a
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
                 whileTap={{ scale: 0.95 }}
-                href="#explore"
-                className="px-8 py-4 bg-gradient-to-r from-forest-600 to-go-green-500 text-white rounded-full font-bold hover:shadow-lg hover:shadow-forest-500/30 transition-all text-lg"
+                href="/trip-planner"
+                className="inline-block px-10 py-4 border-2 border-white text-white font-semibold tracking-widest text-sm uppercase transition-all duration-300 hover:shadow-lg"
               >
-                Explore Guide
-              </motion.a>
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href="/signup"
-                className="px-8 py-4 bg-white text-slate-700 border border-slate-200 rounded-full font-bold hover:bg-slate-50 hover:border-slate-300 transition-all text-lg shadow-sm"
-              >
-                Join Community
+                BOOK YOUR TRIP
               </motion.a>
             </motion.div>
           </div>
 
-          <div className="absolute right-10 top-1/2 transform -translate-y-1/2 hidden xl:block z-20">
-            <WeatherWidget />
-          </div>
-
-          <div className="xl:hidden mt-12 relative z-20">
-            <WeatherWidget />
-          </div>
-
+          {/* Scroll indicator */}
           <motion.div
             className="absolute bottom-10 left-1/2 transform -translate-x-1/2"
             animate={{ y: [0, 10, 0] }}
             transition={{ repeat: Infinity, duration: 2 }}
           >
-            <svg className="w-8 h-8 text-forest-500/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           </motion.div>

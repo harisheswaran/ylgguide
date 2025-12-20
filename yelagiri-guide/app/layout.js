@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Inter, Satisfy, Oswald } from "next/font/google";
 import "./globals.css";
 import "./polyfills";
 import { AuthProvider } from './context/AuthContext';
@@ -12,7 +12,9 @@ import BudgetTracker from '@/components/practical/BudgetTracker';
 import Sidebar from "@/components/layout/Sidebar";
 import FloatingAIButton from '@/components/ai/FloatingAIButton';
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const satisfy = Satisfy({ weight: "400", subsets: ["latin"], variable: "--font-satisfy" });
+const oswald = Oswald({ subsets: ["latin"], variable: "--font-oswald" });
 
 export const metadata = {
   title: "Go Elagiri",
@@ -22,7 +24,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${satisfy.variable} ${oswald.variable} ${inter.className}`}>
         <Providers>
           <AuthProvider>
             {children}
