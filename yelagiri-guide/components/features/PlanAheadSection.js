@@ -20,7 +20,7 @@ const services = [
         category: "PREMIUM EXPERIENCE",
         description: "Curated travel programs designed to showcase the authentic essence of Yelagiri's landscape.",
         icon: <Package className="w-5 h-5" />,
-        href: "/packages",
+        href: "/trip-packages",
         features: [
             "Premium accommodation stays",
             "Professional sightseeing tours",
