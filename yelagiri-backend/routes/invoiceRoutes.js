@@ -15,6 +15,7 @@ const { emailLimiter } = require('../middleware/rateLimiter');
 router.get('/:id/download', downloadInvoice);
 router.get('/:id', getInvoice);
 router.get('/booking/:bookingId', getInvoiceByBooking);
+router.post('/generate-instant', require('../controllers/invoiceController').generateInstantInvoice);
 
 // Admin routes (add auth middleware when ready)
 router.post('/:id/resend', emailLimiter, validateMongoId, resendInvoice);

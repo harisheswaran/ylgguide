@@ -1,0 +1,145 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { 
+    CheckCircle2, Download, Calendar, 
+    Users, FileText, Phone, Mail, ShieldCheck, Clipboard, ArrowRight, User 
+} from 'lucide-react';
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+
+export default function PackageBookingConfirmation({ booking }) {
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    useEffect(() => {
+        if (booking && typeof window !== 'undefined') {
+            // 1. Save to Local Storage for "My Bookings"
+            const savedBookings = JSON.parse(localStorage.getItem('my_bookings') || '[]');
+            if (!savedBookings.find(b => b._id === booking._id || b.bookingId === booking.bookingId)) {
+                savedBookings.unshift(booking);
+                localStorage.setItem('my_bookings', JSON.stringify(savedBookings));
+            }
+
+            // 2. Sync to Backend Memory (Fixes Email Preview "Mock Data Incorrect" issue)
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            fetch(`${apiUrl}/api/bookings/sync-mock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            }).then(() => console.log('Booking synced to backend memory for preview consistency'))
+              .catch(err => console.warn('Sync failed', err));
+        }
+    }, [booking]);
+
+    const handleDownload = async (e) => {
+        e.preventDefault();
+        if (isDownloading) return;
+        setIsDownloading(true);
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            
+            // USE INSTANT GENERATION FOR PERSISTENCE (Fixes user mismatch issue)
+            const res = await fetch(`${apiUrl}/api/invoices/generate-instant`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            });
+            
+            const data = await res.json();
+            if (data.success && data.data?.downloadUrl) {
+                window.location.href = `${apiUrl}${data.data.downloadUrl}`;
+            } else {
+                throw new Error("Invoice generation failed");
+            }
+        } catch (error) {
+            console.error("Download failed:", error);
+            alert("Could not generate invoice. Please try again.");
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    return (
+        <div className="max-w-2xl mx-auto w-full px-4 py-8 font-sans text-[#333]">
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
+                className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100"
+            >
+                <div className="h-1.5 bg-gradient-to-r from-[#BFA76A] via-[#F3E5AB] to-[#BFA76A] w-full" />
+                
+                <div className="text-center pt-8 pb-6 px-6 border-b border-dashed border-gray-200 bg-gradient-to-b from-[#fafbf9] to-white">
+                    <CheckCircle2 className="w-12 h-12 text-[#1F3D2B] mx-auto mb-3" />
+                    <h1 className="text-2xl font-bold text-[#1F3D2B] uppercase tracking-wide">Booking Confirmed</h1>
+                    <p className="text-gray-500 text-sm">Your luxury journey begins soon.</p>
+                </div>
+
+                <div className="p-6 md:p-10">
+                    <div className="mb-8">
+                        <p className="text-lg text-[#1F3D2B] font-semibold mb-4">Dear {booking.guestName},</p>
+                        <div className="bg-green-50 border border-green-100 text-green-900 px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 mb-5">
+                            <ShieldCheck className="w-4 h-4" />
+                            <span>Payment successfully processed.</span>
+                        </div>
+                        <p className="text-gray-600 text-sm leading-relaxed">
+                            Thank you for choosing <span className="font-bold text-[#1F3D2B]">Go Yelagiri</span>. We are thrilled to host you.
+                        </p>
+                    </div>
+
+                    <div className="bg-[#FAFBF9] border border-gray-100 rounded-xl p-6 mb-8 relative overflow-hidden">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#BFA76A]" />
+                        <h3 className="text-[#1F3D2B] font-bold text-base mb-5 flex items-center gap-2">
+                            <Clipboard className="w-4 h-4 text-[#BFA76A]" />
+                            Package Summary
+                        </h3>
+                        <div className="space-y-3">
+                            {[
+                                { label: 'Booking ID', value: booking.bookingId || booking._id },
+                                { label: 'Package', value: booking.packageName },
+                                { label: 'Guests', value: `${booking.guests} Person(s)` },
+                                { label: 'Rooms', value: `${booking.rooms} Room(s)` },
+                                { label: 'Check-in', value: new Date(booking.checkIn).toLocaleDateString() },
+                                { label: 'Check-out', value: new Date(booking.checkOut).toLocaleDateString() },
+                                { label: 'Accommodation', value: booking.accommodationType ? (booking.accommodationType.charAt(0).toUpperCase() + booking.accommodationType.slice(1)) : 'Standard' },
+                            ].map((item, i) => (
+                                <div key={i} className="flex justify-between border-b border-dashed border-gray-200 pb-2 last:border-0">
+                                    <span className="text-xs text-gray-400 uppercase font-bold">{item.label}</span>
+                                    <span className="text-sm font-medium text-[#1F3D2B]">{item.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="bg-[#FAFBF9] border border-gray-100 rounded-xl p-6 mb-8">
+                        <div className="space-y-3">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">Base Amount</span>
+                                <span className="font-medium text-[#1F3D2B]">₹{(booking.baseAmount || (booking.totalAmount / 1.18)).toLocaleString('en-IN')}</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-gray-500">GST (18%)</span>
+                                <span className="font-medium text-[#1F3D2B]">₹{(booking.taxAmount || (booking.totalAmount - (booking.totalAmount / 1.18))).toLocaleString('en-IN')}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-[#1F3D2B] to-[#0f1f16] text-white rounded-xl p-6 mb-8 text-center shadow-lg">
+                        <div className="text-[10px] text-[#BFA76A] uppercase tracking-widest mb-1">Total Amount Paid</div>
+                        <div className="text-3xl font-bold">₹{booking.totalAmount?.toLocaleString()}</div>
+                    </div>
+
+                    <div className="grid sm:grid-cols-3 gap-3 mb-8">
+                        <button onClick={handleDownload} disabled={isDownloading} className="py-3 px-4 bg-[#BFA76A] text-white font-bold rounded-lg text-sm flex items-center justify-center gap-2">
+                            <Download className="w-4 h-4" /> Invoice
+                        </button>
+                        <button onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/bookings/${booking._id || booking.bookingId}/email-preview`, '_blank')} className="py-3 px-4 bg-[#1F3D2B] text-white font-bold rounded-lg text-sm flex items-center justify-center gap-2">
+                            <Mail className="w-4 h-4" /> Email Preview
+                        </button>
+                        <Link href="/my-bookings" className="py-3 px-4 bg-white border border-gray-200 text-[#1F3D2B] font-bold rounded-lg text-sm flex items-center justify-center gap-2">
+                            My Bookings <ArrowRight className="w-4 h-4" />
+                        </Link>
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    );
+}

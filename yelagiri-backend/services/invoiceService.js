@@ -23,7 +23,7 @@ const MOCK_DB_MODE = process.env.MOCK_DB_MODE === 'true';
  */
 async function createInvoice(booking) {
     try {
-        // Check if invoice already exists for this booking (skip in mock mode)
+        // Check if invoice already exists for this booking
         if (!MOCK_DB_MODE) {
             const existingInvoice = await Invoice.findOne({ booking: booking._id });
             if (existingInvoice) {
@@ -34,6 +34,16 @@ async function createInvoice(booking) {
                      generateInvoicePDFAsync(existingInvoice);
                 }
                 return existingInvoice;
+            }
+        } else {
+            // In Mock Mode, if invoice exists in memory, regenerate the PDF to ensure latest design
+            // This aids development so we don't need to create new bookings constantly to see PDF changes
+            const mockInvoiceKey = Object.keys(global.mockInvoices).find(key => global.mockInvoices[key].booking === booking._id);
+            if (mockInvoiceKey) {
+                console.log('🎭 MOCK MODE: Regenerating PDF for existing mock booking to reflect latest design.');
+                const invoice = global.mockInvoices[mockInvoiceKey];
+                await generateInvoicePDFAsync(invoice);
+                return invoice;
             }
         }
 
@@ -138,6 +148,8 @@ function preparePackageInvoiceData(booking, invoiceNumber, baseAmount, gstRate, 
         checkInDate: booking.checkIn,
         checkOutDate: booking.checkOut,
         numberOfGuests: booking.guests,
+        rooms: booking.rooms,
+        accommodationType: booking.accommodationType,
         // Common Financials
         baseAmount,
         gstRate,
@@ -303,7 +315,7 @@ async function getAllInvoices(filters = {}, options = {}) {
  */
 async function regenerateInvoicePDF(invoiceId) {
     try {
-        const invoice = await Invoice.findById(invoiceId);
+        const invoice = await getInvoiceById(invoiceId);
         if (!invoice) {
             throw new Error('Invoice not found');
         }
