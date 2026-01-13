@@ -18,6 +18,15 @@ export default function GuideBookingConfirmation({ booking }) {
                 savedBookings.unshift(booking);
                 localStorage.setItem('my_bookings', JSON.stringify(savedBookings));
             }
+
+            // Sync to Backend Memory (Fixes Email Preview issues)
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            fetch(`${apiUrl}/api/bookings/sync-mock`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            }).then(() => console.log('Guide Booking synced to backend memory'))
+              .catch(err => console.warn('Sync failed', err));
         }
     }, [booking]);
 
@@ -26,18 +35,24 @@ export default function GuideBookingConfirmation({ booking }) {
         if (isDownloading) return;
         setIsDownloading(true);
         try {
-            const id = booking._id || booking.bookingId;
             const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-            const res = await fetch(`${apiUrl}/api/invoices/booking/${id}`);
+            
+            // USE INSTANT GENERATION FOR PERSISTENCE (Like Package Confirmation)
+            const res = await fetch(`${apiUrl}/api/invoices/generate-instant`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(booking)
+            });
+            
             const data = await res.json();
             if (data.success && data.data?.downloadUrl) {
                 window.location.href = `${apiUrl}${data.data.downloadUrl}`;
             } else {
-                throw new Error("Invoice not found");
+                throw new Error("Invoice generation failed");
             }
         } catch (error) {
             console.error("Download failed:", error);
-            alert("Invoice is being generated. Please click again shortly.");
+            alert("Could not generate invoice. Please try again.");
         } finally {
             setIsDownloading(false);
         }
