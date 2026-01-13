@@ -153,12 +153,12 @@ function renderPackageDetails(doc, invoiceData, primaryColor, textColor, lightGr
     doc.fontSize(12)
        .fillColor(primaryColor)
        .font('Helvetica-Bold')
-       .text('PACKAGE DETAILS:', 50, yPosition);
+       .text('PACKAGE BOOKING SUMMARY:', 50, yPosition);
 
     yPosition += 25;
 
     // Package info box
-    doc.roundedRect(50, yPosition, 495, 100, 5)
+    doc.roundedRect(50, yPosition, 495, 145, 5)
        .fillAndStroke(lightGray, '#E9ECEF');
 
     yPosition += 15;
@@ -183,10 +183,12 @@ function renderPackageDetails(doc, invoiceData, primaryColor, textColor, lightGr
        .font('Helvetica')
        .text(`Check-in: ${new Date(invoiceData.checkInDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition)
        .text(`Check-out: ${new Date(invoiceData.checkOutDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition + 15)
-       .text(`Number of Guests: ${invoiceData.numberOfGuests}`, 65, yPosition + 30);
+       .text(`Guests: ${invoiceData.numberOfGuests}`, 65, yPosition + 30)
+       .text(`Rooms: ${invoiceData.rooms || 1}`, 65, yPosition + 45)
+       .text(`Accommodation: ${invoiceData.accommodationType ? (invoiceData.accommodationType.charAt(0).toUpperCase() + invoiceData.accommodationType.slice(1)) : 'Standard'}`, 65, yPosition + 60);
 
     // Pricing table
-    yPosition = 440;
+    yPosition = 455; // Adjusted start position
 
     doc.fontSize(12)
        .fillColor(primaryColor)
@@ -211,7 +213,7 @@ function renderPackageDetails(doc, invoiceData, primaryColor, textColor, lightGr
     doc.fontSize(10)
        .fillColor(textColor)
        .font('Helvetica')
-       .text('Package Base Amount', 65, yPosition + 10)
+       .text('Base Amount', 65, yPosition + 10)
        .text(`₹${invoiceData.baseAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
 
     yPosition += 30;

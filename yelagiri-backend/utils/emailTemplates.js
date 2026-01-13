@@ -85,6 +85,13 @@ function getPackageConfirmationEmail(data) {
                 <div class="detail-row"><span class="detail-label">Check-in:</span><span class="detail-value">${new Date(checkInDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span></div>
                 <div class="detail-row"><span class="detail-label">Check-out:</span><span class="detail-value">${new Date(checkOutDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</span></div>
                 <div class="detail-row"><span class="detail-label">Guests:</span><span class="detail-value">${guests}</span></div>
+                ${data.rooms ? `<div class="detail-row"><span class="detail-label">Rooms:</span><span class="detail-value">${data.rooms}</span></div>` : ''}
+                ${data.accommodationType ? `<div class="detail-row"><span class="detail-label">Accommodation:</span><span class="detail-value" style="text-transform: capitalize;">${data.accommodationType}</span></div>` : ''}
+            </div>
+
+            <div class="booking-details" style="background: #ffffff; border-left: 4px solid #1A4D2E;">
+                <div class="detail-row"><span class="detail-label">Base Amount:</span><span class="detail-value">₹${(data.baseAmount || 0).toLocaleString('en-IN')}</span></div>
+                <div class="detail-row"><span class="detail-label">GST (18%):</span><span class="detail-value">₹${(data.gstAmount || 0).toLocaleString('en-IN')}</span></div>
             </div>
 
             <div class="total-amount">

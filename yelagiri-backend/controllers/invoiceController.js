@@ -34,6 +34,7 @@ const downloadInvoice = async (req, res) => {
         // Fallback Mock Handling (Only if not found in store)
         if (!invoice && (id.startsWith('INV-MOCK') || id === 'mock_invoice_id' || id.startsWith('mock_'))) {
             console.log(`🎭 MOCK DOWNLOAD: Generating generic fallback for ${id}`);
+            // Default to PACKAGE if not found (fixes user issue with Trek details showing up)
             const mockInvoice = {
                  invoiceNumber: (id === 'mock_invoice_id' || id.startsWith('mock_')) ? `INV-MOCK-${Date.now()}` : id,
                  invoiceDate: new Date(),
@@ -41,19 +42,20 @@ const downloadInvoice = async (req, res) => {
                   guestName: 'Deepak Kumar',
                   guestEmail: 'deepak@test.com',
                   guestPhone: '+91 99887 76655',
-                  packageName: 'Professional Trek with Arjun Swamy',
-                  guideEmail: 'arjun.swamy@yelaguide.com',
-                  guidePhone: '+91 94432 12345',
-                  baseAmount: 12000,
-                  gstAmount: 2160,
-                  totalAmount: 14160,
+                  packageName: 'Elite Yelagiri Escape Package',
+                  packageDescription: 'A luxury stay in the heart of Yelagiri with all amenities included.',
+                  baseAmount: 14000,
+                  gstAmount: 2520,
+                  totalAmount: 16520,
                   gstRate: 18,
-                  numberOfGuests: 2,
-                  bookingPeople: '2-4 People',
-                  bookingSlot: '09:00 AM',
-                  bookingDate: new Date(Date.now() + 86400000),
+                  numberOfGuests: 3,
+                  rooms: 1,
+                  accommodationType: 'Villa',
                   checkInDate: new Date(Date.now() + 86400000),
-                  checkOutDate: new Date(Date.now() + 86400000),
+                  checkOutDate: new Date(Date.now() + 86400000 * 3),
+                  // Clear guide fields to prevent Trek template trigger
+                  bookingDate: null, 
+                  guideEmail: null,
                   // Ensure PDF generation works
                   generationStatus: 'generated'
             };
@@ -82,6 +84,12 @@ const downloadInvoice = async (req, res) => {
         }
 
         console.log(`   PDF Path: ${invoice.pdfPath}`);
+
+        // Force regeneration for Mock Invoices to ensure latest template changes are applied
+        if (invoice.invoiceNumber && invoice.invoiceNumber.startsWith('INV-MOCK')) {
+            console.log(`🎭 MOCK DOWNLOAD: Force regenerating PDF to apply latest template...`);
+            await regenerateInvoicePDF(invoice._id || invoice.invoiceNumber);
+        }
 
         // Check if PDF exists
         if (!invoice.pdfPath || !fs.existsSync(invoice.pdfPath)) {
@@ -239,17 +247,19 @@ const getInvoiceByBooking = async (req, res) => {
                 guestName: 'Deepak Kumar',
                 guestEmail: 'deepak@test.com',
                 guestPhone: '+91 99887 76655',
-                packageName: 'Professional Trek with Arjun Swamy',
-                guideEmail: 'arjun.swamy@yelaguide.com',
-                guidePhone: '+91 94432 12345',
-                baseAmount: 12000,
-                gstAmount: 2160,
-                totalAmount: 14160,
+                packageName: 'Elite Yelagiri Escape Package',
+                packageDescription: 'A luxury stay in the heart of Yelagiri with all amenities included.',
+                baseAmount: 14000,
+                gstAmount: 2520,
+                totalAmount: 16520,
                 gstRate: 18,
-                numberOfGuests: 2,
-                bookingPeople: '2-4 People',
-                bookingSlot: '09:00 AM',
-                bookingDate: new Date(Date.now() + 86400000),
+                numberOfGuests: 3,
+                rooms: 1,
+                accommodationType: 'Villa',
+                checkInDate: new Date(Date.now() + 86400000),
+                checkOutDate: new Date(Date.now() + 86400000 * 3),
+                bookingDate: null, 
+                guideEmail: null,
                 generationStatus: 'generated',
                 pdfPath: 'mock_path.pdf',
                 toObject: function() { return this; }
@@ -380,11 +390,88 @@ const regenerateInvoice = async (req, res) => {
     }
 };
 
+/**
+ * @desc    Generate instant invoice from payload (For Screen-Match Guarantee)
+ * @route   POST /api/invoices/generate-instant
+ * @access  Public
+ */
+const generateInstantInvoice = async (req, res) => {
+    try {
+        const bookingData = req.body;
+        console.log('⚡ Generating Instant Invoice from Payload');
+
+        const { generateInvoicePDF } = require('../utils/invoiceGenerator');
+        const invoiceNumber = `INV-MOCK-${Date.now()}`;
+        
+        // Map frontend booking data to invoice data structure
+        const invoiceData = {
+            invoiceNumber,
+            invoiceDate: new Date(),
+            dueDate: new Date(),
+            guestName: bookingData.guestName,
+            guestEmail: bookingData.guestEmail,
+            guestPhone: bookingData.guestPhone,
+            packageName: bookingData.packageName,
+            packageDescription: bookingData.packageDescription || 'Premium Package Experience',
+            
+            // Financials
+            baseAmount: bookingData.baseAmount || (bookingData.totalAmount / 1.18),
+            gstAmount: bookingData.taxAmount || (bookingData.totalAmount - (bookingData.totalAmount / 1.18)),
+            totalAmount: bookingData.totalAmount,
+            gstRate: 18,
+            
+            // Details
+            numberOfGuests: bookingData.guests,
+            rooms: bookingData.rooms || 1,
+            accommodationType: bookingData.accommodationType || 'Standard',
+            checkInDate: bookingData.checkIn || new Date(),
+            checkOutDate: bookingData.checkOut || new Date(Date.now() + 86400000),
+            
+            // Flags
+            bookingDate: null, 
+            guideEmail: null,
+            generationStatus: 'generated'
+        };
+
+        const invoiceDir = path.join(__dirname, '../invoices');
+        if (!fs.existsSync(invoiceDir)) fs.mkdirSync(invoiceDir, { recursive: true });
+        
+        const filePath = path.join(invoiceDir, `${invoiceNumber}.pdf`);
+        await generateInvoicePDF(invoiceData, filePath);
+        
+        console.log('   ✅ Instant PDF Generated:', filePath);
+
+        // Serve directly or return URL
+        // Returning URL to keep consistency with other flows
+        const downloadToken = generateDownloadToken(invoiceNumber);
+        
+        // Save to mock store so download link works
+        if (!global.mockInvoices) global.mockInvoices = {};
+        global.mockInvoices[invoiceNumber] = {
+            ...invoiceData,
+            _id: invoiceNumber,
+            pdfPath: filePath
+        };
+
+        res.json({
+            success: true,
+            data: {
+                downloadUrl: `/api/invoices/${invoiceNumber}/download`
+            }
+        });
+
+    } catch (error) {
+        console.error('Error generating instant invoice:', error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 module.exports = {
     downloadInvoice,
     getInvoice,
     getInvoiceByBooking,
     resendInvoice,
     listInvoices,
-    regenerateInvoice
+    regenerateInvoice,
+    generateInstantInvoice
 };

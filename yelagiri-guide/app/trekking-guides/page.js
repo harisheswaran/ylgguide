@@ -779,6 +779,7 @@ export default function TrekkingGuides() {
                                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Preferred Date <span className="text-red-500">*</span></label>
                                                     <input 
                                                         type="date" 
+                                                        id="guideBookingDate"
                                                         className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 font-medium text-[#1F3D2B] focus:outline-none focus:ring-2 focus:ring-[#BFA76A]/20" 
                                                         value={bookingDate}
                                                         onChange={(e) => setBookingDate(e.target.value)}
@@ -788,6 +789,7 @@ export default function TrekkingGuides() {
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Number of People</label>
                                                     <select 
+                                                        id="guideBookingPeople"
                                                         className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 font-medium text-[#1F3D2B] focus:outline-none focus:ring-2 focus:ring-[#BFA76A]/20"
                                                         value={bookingPeople}
                                                         onChange={(e) => setBookingPeople(e.target.value)}
@@ -815,6 +817,7 @@ export default function TrekkingGuides() {
                                                     {['06:00 AM', '09:00 AM', '02:00 PM', '04:00 PM'].map(slot => (
                                                         <button 
                                                             key={slot} 
+                                                            id={`slot-${slot.replace(/\s+/g, '-')}`}
                                                             onClick={() => setBookingSlot(slot)}
                                                             className={`py-4 border rounded-2xl text-xs font-bold transition-all relative overflow-hidden group ${
                                                                 bookingSlot === slot 
@@ -894,6 +897,7 @@ export default function TrekkingGuides() {
 
                                                 <button 
                                                     onClick={handleConfirmBooking}
+                                                    id="secure-slot-button"
                                                     className="w-full py-5 bg-[#BFA76A] text-white rounded-[1.5rem] font-bold uppercase tracking-widest hover:bg-[#a68d52] transition-all flex items-center justify-center gap-3 shadow-xl shadow-black/30 group active:scale-95"
                                                 >
                                                     Secure This Slot <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

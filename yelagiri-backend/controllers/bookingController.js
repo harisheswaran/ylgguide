@@ -7,6 +7,7 @@ const { createMockPaymentOrder, isMockMode } = require('../services/mockPaymentS
 
 // Temporary mock mode for database operations
 const MOCK_DB_MODE = process.env.MOCK_DB_MODE === 'true';
+global.mockBookings = global.mockBookings || {};
 
 const createBooking = async (req, res) => {
     try {
@@ -53,7 +54,8 @@ const handlePackageBooking = async (req, res) => {
             paymentStatus: 'unpaid',
             bookingDate: null, bookingSlot: null, guideEmail: null
         };
-        console.log('🎭 MOCK PACKAGE BOOKING created');
+        global.mockBookings[booking._id] = booking;
+        console.log('🎭 MOCK PACKAGE BOOKING created and saved to memory');
     } else {
         booking = new PackageBooking({
             guestName, guestEmail, guestPhone,
@@ -97,7 +99,8 @@ const handleGuideBooking = async (req, res) => {
             paymentStatus: 'unpaid',
             checkIn: null, checkOut: null, rooms: null
         };
-        console.log('🎭 MOCK GUIDE BOOKING created');
+        global.mockBookings[booking._id] = booking;
+        console.log('🎭 MOCK GUIDE BOOKING created and saved to memory');
     } else {
         booking = new GuideBooking({
             guestName, guestEmail, guestPhone,
@@ -190,24 +193,39 @@ const verifyPayment = async (req, res) => {
         let booking;
         
         if (MOCK_DB_MODE) {
-            // Mock booking for testing
-            const isGuide = bookingId.includes('guide') || (req.body.isGuide === true);
-            booking = {
-                _id: bookingId,
-                bookingId: `BK${Date.now()}`,
-                guestName: 'Mock User',
-                guestEmail: 'mock@example.com',
-                packageName: 'Mock Package',
-                guests: 2,
-                baseAmount: 12000,
-                taxAmount: 2160,
-                totalAmount: 14160,
-                paymentStatus: 'unpaid',
-                bookingStatus: 'pending',
-                // Add dummy fields to prevent crashes
-                bookingDate: isGuide ? new Date().toISOString() : null,
-                checkIn: isGuide ? null : new Date()
-            };
+            // Check memory store first
+            if (global.mockBookings && global.mockBookings[bookingId]) {
+                booking = global.mockBookings[bookingId];
+                console.log('🧠 Retrieved mock booking from memory store');
+            } else {
+                // Mock booking for testing (Fallback)
+                const isPkg = bookingId.toLowerCase().includes('pkg');
+                const isGuide = bookingId.toLowerCase().includes('guide');
+                
+                booking = {
+                    _id: bookingId,
+                    bookingId: `BK${Date.now()}`,
+                    guestName: 'Deepak Kumar',
+                    guestEmail: 'deepak@test.com',
+                    guestPhone: '+91 99887 76655',
+                    packageName: isGuide ? 'Professional Trek with Arjun Swamy' : 'Elite Yelagiri Escape Package',
+                    packageDescription: isGuide ? 'Expert-led mountain exploration through Yelagiri hills' : 'A luxury stay in the heart of Yelagiri with all amenities included.',
+                    guests: 2,
+                    rooms: isGuide ? null : 1,
+                    accommodationType: isGuide ? null : 'cottage',
+                    baseAmount: 12000,
+                    taxAmount: 2160,
+                    totalAmount: 14160,
+                    paymentStatus: 'unpaid',
+                    bookingStatus: 'pending',
+                    // Fields for both types but set to null accordingly
+                    bookingDate: isGuide ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : null,
+                    bookingSlot: isGuide ? '09:00 AM' : null,
+                    bookingPeople: isGuide ? '2-4 People' : null,
+                    checkIn: isGuide ? null : new Date(),
+                    checkOut: isGuide ? null : new Date(Date.now() + 86400000 * 3)
+                };
+            }
             console.log('🎭 MOCK DB MODE: Mock booking verification');
         } else {
             booking = await findBookingById(bookingId);
@@ -305,16 +323,25 @@ const getUserBookings = async (req, res) => {
 const getBookingForConfirmation = async (req, res) => {
     try {
         if (MOCK_DB_MODE) {
-            // Return smarter mock booking data for testing
-            const isGuide = req.params.id.includes('guide') || req.params.id.includes('mock_guide');
+            // Check memory store
+            if (global.mockBookings && global.mockBookings[req.params.id]) {
+                const booking = global.mockBookings[req.params.id];
+                console.log('🧠 Returning stored mock booking for confirmation');
+                return res.json({ success: true, data: booking });
+            }
+
+            // Return smarter mock booking data for testing (Fallback)
+            const isPkg = req.params.id.toLowerCase().includes('pkg');
+            const isGuide = req.params.id.toLowerCase().includes('guide') && !isPkg;
+            
             const mockBooking = {
                 _id: req.params.id,
                 bookingId: `BK${Date.now()}`,
                 guestName: 'Deepak Kumar',
                 guestEmail: 'deepak@test.com',
                 guestPhone: '+91 99887 76655',
-                packageName: 'Professional Trek with Arjun Swamy',
-                packageDescription: 'Expert-led mountain exploration through Yelagiri hills',
+                packageName: isGuide ? 'Professional Trek with Arjun Swamy' : 'Elite Yelagiri Escape Package',
+                packageDescription: isGuide ? 'Expert-led mountain exploration through Yelagiri hills' : 'A luxury stay in the heart of Yelagiri with all amenities included.',
                 guests: 2,
                 rooms: isGuide ? null : 1,
                 accommodationType: isGuide ? null : 'cottage',
@@ -357,33 +384,41 @@ const getEmailPreview = async (req, res) => {
         let booking;
         
         if (MOCK_DB_MODE) {
-            // Mock booking for testing (Check if it's a guide)
-            const isGuide = req.params.id.includes('guide') || req.params.id.includes('mock_guide');
-            booking = {
-                _id: req.params.id,
-                bookingId: `BK${Date.now()}`,
-                guestName: 'Deepak Kumar',
-                guestEmail: 'deepak@test.com',
-                guestPhone: '+91 99887 76655',
-                packageName: 'Professional Trek with Arjun Swamy',
-                packageDescription: 'Expert-led mountain exploration through Yelagiri hills',
-                guests: 2,
-                rooms: isGuide ? null : 1,
-                checkIn: new Date(Date.now() + 86400000),
-                checkOut: new Date(Date.now() + 86400000 * 4),
-                // Trekking fields
-                bookingDate: isGuide ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : null,
-                bookingSlot: isGuide ? '09:00 AM' : null,
-                bookingPeople: isGuide ? '2-4 People' : null,
-                guideEmail: isGuide ? 'arjun.swamy@yelaguide.com' : null,
-                guidePhone: isGuide ? '+91 94432 12345' : null,
-                baseAmount: 12000,
-                taxAmount: 2160,
-                totalAmount: 14160,
-                paymentStatus: 'paid',
-                bookingStatus: 'confirmed',
-                createdAt: new Date()
-            };
+            // Check memory store
+            if (global.mockBookings && global.mockBookings[req.params.id]) {
+                booking = global.mockBookings[req.params.id];
+                console.log('🧠 Previewing stored mock booking detail');
+            } else {
+                // Mock booking for testing (Fallback)
+                const isPkg = req.params.id.toLowerCase().includes('pkg');
+                const isGuide = req.params.id.toLowerCase().includes('guide') && !isPkg;
+                
+                booking = {
+                    _id: req.params.id,
+                    bookingId: `BK${Date.now()}`,
+                    guestName: 'Deepak Kumar',
+                    guestEmail: 'deepak@test.com',
+                    guestPhone: '+91 99887 76655',
+                    packageName: isGuide ? 'Professional Trek with Arjun Swamy' : 'Elite Yelagiri Escape Package',
+                    packageDescription: isGuide ? 'Expert-led mountain exploration through Yelagiri hills' : 'A luxury stay in the heart of Yelagiri with all amenities included.',
+                    guests: 2,
+                    rooms: isGuide ? null : 1,
+                    checkIn: new Date(Date.now() + 86400000),
+                    checkOut: new Date(Date.now() + 86400000 * 4),
+                    // Trekking fields
+                    bookingDate: isGuide ? new Date(Date.now() + 86400000).toISOString().split('T')[0] : null,
+                    bookingSlot: isGuide ? '09:00 AM' : null,
+                    bookingPeople: isGuide ? '2-4 People' : null,
+                    guideEmail: isGuide ? 'arjun.swamy@yelaguide.com' : null,
+                    guidePhone: isGuide ? '+91 94432 12345' : null,
+                    baseAmount: 12000,
+                    taxAmount: 2160,
+                    totalAmount: 14160,
+                    paymentStatus: 'paid',
+                    bookingStatus: 'confirmed',
+                    createdAt: new Date()
+                };
+            }
         } else {
             booking = await findBookingById(req.params.id);
             if (!booking) {
@@ -402,7 +437,11 @@ const getEmailPreview = async (req, res) => {
             checkOutDate: booking.checkOut,
             guests: booking.guests,
             totalAmount: booking.totalAmount,
+            baseAmount: booking.baseAmount || (booking.totalAmount / 1.18),
+            gstAmount: booking.taxAmount || (booking.totalAmount - (booking.totalAmount / 1.18)),
             invoiceNumber: invoice.invoiceNumber,
+            rooms: booking.rooms,
+            accommodationType: booking.accommodationType,
             // Pass all guide fields for the template
             bookingDate: booking.bookingDate,
             bookingSlot: booking.bookingSlot,
@@ -448,11 +487,39 @@ const getEmailPreview = async (req, res) => {
     }
 };
 
+const syncMockBooking = async (req, res) => {
+    try {
+        const booking = req.body;
+        if (!booking || (!booking._id && !booking.bookingId)) {
+            return res.status(400).json({ success: false, message: 'Invalid booking data' });
+        }
+        
+        const id = booking.bookingId || booking._id; // Prefer bookingId if available for key
+        
+        // Ensure global store exists
+        global.mockBookings = global.mockBookings || {};
+        
+        // Save to memory
+        global.mockBookings[id] = booking;
+        // Also save by _id if different
+        if (booking._id && booking._id !== id) {
+            global.mockBookings[booking._id] = booking;
+        }
+
+        console.log(`🧠 Synced mock booking ${id} from frontend to memory.`);
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Sync failed:', error);
+        res.status(500).json({ success: false });
+    }
+};
+
 module.exports = {
     createBooking,
     verifyPayment,
     getUserBookings,
     getMyBookings,
     getBookingForConfirmation,
-    getEmailPreview
+    getEmailPreview,
+    syncMockBooking
 };
