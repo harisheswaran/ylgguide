@@ -33,7 +33,7 @@ const services = [
         category: "ADVENTURE",
         description: "Guided experiences led by certified local experts through exclusive mountain trails.",
         icon: <UserCheck className="w-5 h-5" />,
-        href: "/activities",
+        href: "/trekking-guides",
         features: [
             "Certified mountain guides",
             "Technical trekking expertise",
@@ -203,7 +203,7 @@ export default function PlanAheadSection() {
                                                     href={service.href}
                                                     className="inline-flex items-center gap-2 text-[#1F3D2B] text-base font-bold relative group/btn"
                                                 >
-                                                    <span className="relative z-10" style={{ fontFamily: 'var(--font-poppins)' }}>Book Now</span>
+                                                    <span className="relative z-10" style={{ fontFamily: 'var(--font-poppins)' }}>Explore</span>
                                                     <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-2" />
                                                     <div className="absolute bottom-[-4px] left-0 w-6 h-[2px] bg-[#BFA76A] group-hover/btn:w-full transition-all duration-300"></div>
                                                 </Link>

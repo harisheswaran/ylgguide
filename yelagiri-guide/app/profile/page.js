@@ -523,7 +523,7 @@ export default function ProfilePage() {
                                     </h2>
                                     <div className="space-y-3">
                                         {[
-                                            { label: 'My Bookings', icon: '🎫', href: '/bookings', color: 'from-go-green-500 to-blue-500' },
+                                            { label: 'My Bookings', icon: '🎫', href: '/my-bookings', color: 'from-go-green-500 to-blue-500' },
                                             { label: 'Favorites', icon: '❤️', href: '/favorites', color: 'from-red-500 to-rose-500' },
                                             { label: 'Trip Planner', icon: '🗺️', href: '/trip-planner', color: 'from-purple-500 to-pink-500' },
                                             { label: 'Budget Tracker', icon: '💰', href: '/budget-tracker', color: 'from-orange-500 to-amber-500' }

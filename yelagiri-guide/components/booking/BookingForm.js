@@ -3,25 +3,58 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function BookingForm({ packageData = null }) {
+export default function BookingForm({ packageId, packageTitle, packagePrice, packageDescription, bookingDate, bookingPeople, bookingSlot, guideEmail, guidePhone }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showMockModal, setShowMockModal] = useState(false);
     const [mockData, setMockData] = useState(null);
     
+    // Convert price to number safely
+    const basePrice = packagePrice ? parseInt(packagePrice.replace(/[^0-9]/g, '')) : 12000;
+
     const [formData, setFormData] = useState({
         guestName: '',
         guestEmail: '',
         guestPhone: '',
-        packageName: packageData?.name || 'Gold Package',
-        packageDescription: packageData?.description || 'Luxury travel experience in Yelagiri Hills',
+        packageName: packageTitle || 'Gold Package',
+        packageDescription: packageDescription || 'Luxury travel experience in Yelagiri Hills',
         checkIn: '',
         checkOut: '',
         guests: 2,
         rooms: 1,
-        baseAmount: packageData?.basePrice || 12000
+        accommodationType: 'standard',
+        specialRequests: '',
+        baseAmount: basePrice,
+        bookingDate: bookingDate || '',
+        bookingSlot: bookingSlot || '',
+        bookingPeople: bookingPeople || '',
+        guideEmail: guideEmail || '',
+        guidePhone: guidePhone || ''
     });
+
+    // Sync formData with props when they change (critical for dynamic updates)
+    useEffect(() => {
+        if (packageTitle || packagePrice || bookingDate || bookingPeople || bookingSlot) {
+            setFormData(prev => ({
+                ...prev,
+                packageName: packageTitle || prev.packageName,
+                baseAmount: packagePrice ? parseInt(packagePrice.replace(/[^0-9]/g, '')) : prev.baseAmount,
+                packageDescription: packageDescription || prev.packageDescription,
+                checkIn: bookingDate || prev.checkIn,
+                // For guide bookings, check-in and check-out are same day
+                checkOut: bookingDate || prev.checkOut,
+                bookingDate: bookingDate || prev.bookingDate,
+                bookingSlot: bookingSlot || prev.bookingSlot,
+                bookingPeople: bookingPeople || prev.bookingPeople,
+                guideEmail: guideEmail || prev.guideEmail,
+                guidePhone: guidePhone || prev.guidePhone,
+                guests: bookingPeople ? (parseInt(bookingPeople.split(' ')[0]) || prev.guests) : prev.guests
+            }));
+        }
+    }, [packageTitle, packagePrice, packageDescription, bookingDate, bookingPeople, bookingSlot, guideEmail, guidePhone]);
+
+    const isGuideBooking = packageId?.startsWith('guide-');
 
     // Calculate tax and total
     const gstRate = 18; // 18% GST
@@ -43,21 +76,49 @@ export default function BookingForm({ packageData = null }) {
         setLoading(true);
 
         try {
-            // Validate dates
-            const checkInDate = new Date(formData.checkIn);
-            const checkOutDate = new Date(formData.checkOut);
-            
-            if (checkOutDate <= checkInDate) {
-                throw new Error('Check-out date must be after check-in date');
+            // Validate mandatory fields
+            if (isGuideBooking) {
+                if (!formData.bookingDate || !formData.bookingSlot || !formData.bookingPeople) {
+                    throw new Error('Please ensure all trekking details (Date, Slot, and Group Size) are selected.');
+                }
+            } else {
+                const checkInDate = new Date(formData.checkIn);
+                const checkOutDate = new Date(formData.checkOut);
+                if (checkOutDate <= checkInDate) {
+                    throw new Error('Check-out date must be after check-in date');
+                }
+            }
+
+            // Ensure derived fields are set for guide bookings
+            const submitData = { ...formData };
+            if (isGuideBooking) {
+                // Determine guests from bookingPeople string (e.g., "2-4 People" -> 2)
+                const derivedGuests = submitData.bookingPeople 
+                    ? parseInt(submitData.bookingPeople.split(' ')[0]) || 1 
+                    : 1;
+
+                submitData.guests = derivedGuests;
+                submitData.rooms = 1; // Default
+                submitData.accommodationType = 'standard'; // Default
+                
+                // Ensure dates are set for backend requirements
+                if (submitData.bookingDate) {
+                    submitData.checkIn = submitData.bookingDate;
+                    submitData.checkOut = submitData.bookingDate; // Same day for trek
+                }
             }
 
             // Create booking
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings`, {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+            console.log('🚀 Submitting booking to:', `${apiUrl}/api/bookings`);
+            console.log('📦 Payload:', submitData);
+
+            const response = await fetch(`${apiUrl}/api/bookings`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(submitData)
             });
 
             const data = await response.json();
@@ -87,7 +148,11 @@ export default function BookingForm({ packageData = null }) {
 
         } catch (err) {
             console.error('Booking error:', err);
-            setError(err.message || 'Failed to process booking');
+            if (err.message === 'Failed to fetch') {
+                setError('Unable to connect to the server. Please ensure the backend is running at http://127.0.0.1:5000');
+            } else {
+                setError(err.message || 'Failed to process booking');
+            }
             setLoading(false);
         }
     };
@@ -98,7 +163,8 @@ export default function BookingForm({ packageData = null }) {
 
         if (status === 'success') {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookings/verify-payment`, {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+                const response = await fetch(`${apiUrl}/api/bookings/verify-payment`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -131,8 +197,8 @@ export default function BookingForm({ packageData = null }) {
         <div className="booking-form-container">
 
             <div className="booking-form-card">
-                <h2 className="form-title">Book Your Luxury Experience</h2>
-                <p className="form-subtitle">Complete your booking details below</p>
+                <h2 className="form-title">{isGuideBooking ? 'Confirm Your Guide Booking' : 'Book Your Luxury Experience'}</h2>
+                <p className="form-subtitle">{isGuideBooking ? 'Please verify the trekking details below' : 'Complete your booking details below'}</p>
 
                 {error && (
                     <div className="error-alert">
@@ -181,7 +247,7 @@ export default function BookingForm({ packageData = null }) {
 
                         <div className="form-row">
                             <div className="form-group">
-                                <label htmlFor="guestEmail">Email Address *</label>
+                                <label htmlFor="guestEmail">Email Address <span className="text-red-500">*</span></label>
                                 <input
                                     type="email"
                                     id="guestEmail"
@@ -193,9 +259,9 @@ export default function BookingForm({ packageData = null }) {
                                     disabled={loading}
                                 />
                             </div>
-
+ 
                             <div className="form-group">
-                                <label htmlFor="guestPhone">Phone Number *</label>
+                                <label htmlFor="guestPhone">Phone Number <span className="text-red-500">*</span></label>
                                 <input
                                     type="tel"
                                     id="guestPhone"
@@ -210,64 +276,147 @@ export default function BookingForm({ packageData = null }) {
                         </div>
                     </div>
 
-                    {/* Package Details */}
+                    {/* Package/Guide Details */}
                     <div className="form-section">
-                        <h3 className="section-title">Package Details</h3>
+                        <h3 className="section-title">{isGuideBooking ? 'Guide Appointment Summary' : 'Package Details'}</h3>
                         
-                        <div className="package-info">
-                            <div className="package-name">{formData.packageName}</div>
-                            <div className="package-description">{formData.packageDescription}</div>
+                        <div className={`package-info ${isGuideBooking ? 'guide-mode' : ''}`}>
+                            {isGuideBooking ? (
+                                <div className="guide-summary-header flex items-center gap-4 mb-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-[#1F3D2B]/5 border border-[#1F3D2B]/10 flex items-center justify-center text-3xl">
+                                        🌲
+                                    </div>
+                                    <div>
+                                        <div className="text-[10px] uppercase tracking-[0.2em] text-[#BFA76A] font-bold mb-1">Professional Guide</div>
+                                        <div className="text-xl font-bold text-[#1F3D2B]">{formData.packageName.replace('Trek with ', '')}</div>
+                                        <div className="text-xs text-gray-400 font-medium">{formData.packageDescription}</div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="package-name">{formData.packageName}</div>
+                                    <div className="package-description">{formData.packageDescription}</div>
+                                </>
+                            )}
+                            
+                            {isGuideBooking && (
+                                <div className="mt-6 flex flex-wrap gap-6 items-center border-t border-[#BFA76A]/10 pt-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-[#BFA76A]/10 flex items-center justify-center text-[#BFA76A]">
+                                            📅
+                                        </div>
+                                        <div>
+                                            <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Date</div>
+                                            <div className="text-sm font-bold text-[#1F3D2B]">{formData.bookingDate}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-[#BFA76A]/10 flex items-center justify-center text-[#BFA76A]">
+                                            ⏰
+                                        </div>
+                                        <div>
+                                            <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Time Slot</div>
+                                            <div className="text-sm font-bold text-[#1F3D2B]">{formData.bookingSlot}</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-[#BFA76A]/10 flex items-center justify-center text-[#BFA76A]">
+                                            👥
+                                        </div>
+                                        <div>
+                                            <div className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Group</div>
+                                            <div className="text-sm font-bold text-[#1F3D2B]">{formData.bookingPeople}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     {/* Booking Details */}
                     <div className="form-section">
-                        <h3 className="section-title">Booking Details</h3>
+                        <h3 className="section-title">{isGuideBooking ? 'Schedule & Preferences' : 'Booking Details'}</h3>
                         
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="checkIn">Check-in Date *</label>
-                                <input
-                                    type="date"
-                                    id="checkIn"
-                                    name="checkIn"
-                                    value={formData.checkIn}
-                                    onChange={handleChange}
-                                    required
-                                    min={new Date().toISOString().split('T')[0]}
-                                    disabled={loading}
-                                />
-                            </div>
+                        {!isGuideBooking && (
+                            <>
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label htmlFor="checkIn">Check-in Date *</label>
+                                        <input
+                                            type="date"
+                                            id="checkIn"
+                                            name="checkIn"
+                                            value={formData.checkIn}
+                                            onChange={handleChange}
+                                            required
+                                            min={new Date().toISOString().split('T')[0]}
+                                            disabled={loading}
+                                        />
+                                    </div>
 
-                            <div className="form-group">
-                                <label htmlFor="checkOut">Check-out Date *</label>
-                                <input
-                                    type="date"
-                                    id="checkOut"
-                                    name="checkOut"
-                                    value={formData.checkOut}
-                                    onChange={handleChange}
-                                    required
-                                    min={formData.checkIn || new Date().toISOString().split('T')[0]}
-                                    disabled={loading}
-                                />
-                            </div>
-                        </div>
+                                    <div className="form-group">
+                                        <label htmlFor="checkOut">Check-out Date *</label>
+                                        <input
+                                            type="date"
+                                            id="checkOut"
+                                            name="checkOut"
+                                            value={formData.checkOut}
+                                            onChange={handleChange}
+                                            required
+                                            min={formData.checkIn || new Date().toISOString().split('T')[0]}
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="guests">Number of Guests *</label>
+                                    <select
+                                        id="guests"
+                                        name="guests"
+                                        value={formData.guests}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={loading}
+                                    >
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                                            <option key={num} value={num}>{num} {num === 1 ? 'Guest' : 'Guests'}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="accommodationType">Accommodation Type *</label>
+                                    <select
+                                        id="accommodationType"
+                                        name="accommodationType"
+                                        value={formData.accommodationType}
+                                        onChange={handleChange}
+                                        required
+                                        disabled={loading}
+                                    >
+                                        <option value="standard">Standard Room</option>
+                                        <option value="cottage">Cottage</option>
+                                        <option value="villa">Villa</option>
+                                        <option value="resort">Resort</option>
+                                        <option value="hotel">Hotel</option>
+                                        <option value="homestay">Homestay</option>
+                                    </select>
+                                </div>
+                            </>
+                        )}
 
                         <div className="form-group">
-                            <label htmlFor="guests">Number of Guests *</label>
-                            <select
-                                id="guests"
-                                name="guests"
-                                value={formData.guests}
+                            <label htmlFor="specialRequests">Special Requests (Optional)</label>
+                            <textarea
+                                id="specialRequests"
+                                name="specialRequests"
+                                value={formData.specialRequests}
                                 onChange={handleChange}
-                                required
+                                placeholder="Any special requirements or preferences..."
+                                rows="3"
                                 disabled={loading}
-                            >
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
-                                    <option key={num} value={num}>{num} {num === 1 ? 'Guest' : 'Guests'}</option>
-                                ))}
-                            </select>
+                            />
                         </div>
                     </div>
 
@@ -276,7 +425,7 @@ export default function BookingForm({ packageData = null }) {
                         <h3 className="section-title">Pricing Summary</h3>
                         
                         <div className="price-row">
-                            <span>Base Amount</span>
+                            <span>{isGuideBooking ? 'Trekking Base Fee' : 'Base Amount'}</span>
                             <span>₹{formData.baseAmount.toLocaleString('en-IN')}</span>
                         </div>
                         
@@ -362,7 +511,7 @@ export default function BookingForm({ packageData = null }) {
                             </div>
                             
                             <p className="text-[10px] text-center text-slate-400">
-                                Clicking "Pay Now" will simulate a successful transaction and generate your invoice.
+                                Clicking &quot;Pay Now&quot; will simulate a successful transaction and generate your invoice.
                             </p>
                         </div>
                     </div>
@@ -457,13 +606,29 @@ export default function BookingForm({ packageData = null }) {
                     transition: all 0.3s ease;
                 }
 
-                input:focus, select:focus {
+                textarea {
+                    padding: 12px 16px;
+                    border: 1px solid #E9ECEF;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    transition: all 0.3s ease;
+                    resize: vertical;
+                    font-family: inherit;
+                }
+
+                .help-text {
+                    font-size: 12px;
+                    color: #6C757D;
+                    margin-top: 4px;
+                }
+
+                input:focus, select:focus, textarea:focus {
                     outline: none;
                     border-color: #C9A961;
                     box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.1);
                 }
 
-                input:disabled, select:disabled {
+                input:disabled, select:disabled, textarea:disabled {
                     background: #F8F9FA;
                     cursor: not-allowed;
                 }

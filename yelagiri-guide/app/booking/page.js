@@ -12,6 +12,12 @@ function BookingContent() {
     const packageTitle = searchParams.get('title');
     const packagePrice = searchParams.get('price');
     const packageDescription = searchParams.get('description');
+    const bookingDate = searchParams.get('date');
+    const bookingPeople = searchParams.get('people');
+    const bookingSlot = searchParams.get('slot');
+
+    const guideEmail = searchParams.get('guideEmail');
+    const guidePhone = searchParams.get('guidePhone');
 
     return (
         <div className="min-h-screen bg-[#FAFBF9]">
@@ -23,6 +29,11 @@ function BookingContent() {
                     packageTitle={packageTitle}
                     packagePrice={packagePrice}
                     packageDescription={packageDescription}
+                    bookingDate={bookingDate}
+                    bookingPeople={bookingPeople}
+                    bookingSlot={bookingSlot}
+                    guideEmail={guideEmail}
+                    guidePhone={guidePhone}
                 />
             </div>
 

@@ -49,7 +49,7 @@ export default function Home() {
       title: "Adventure Activities",
       image: "https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80",
       description: "Pulse-pounding adventures await, including paragliding, rock climbing, and guided treks through the beautiful forest trails.",
-      href: "/activities",
+      href: "/trekking-guides",
       icon: <Tent className="w-5 h-5 text-[#1F3D2B]" strokeWidth={1.5} />
     },
     {
