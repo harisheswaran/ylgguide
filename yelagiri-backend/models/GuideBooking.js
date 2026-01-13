@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const bookingSchema = new mongoose.Schema({
+const guideBookingSchema = new mongoose.Schema({
     // Guest Information
     guestName: {
         type: String,
@@ -19,8 +19,8 @@ const bookingSchema = new mongoose.Schema({
         trim: true
     },
     
-    // Package Information
-    packageName: {
+    // Package (Guide) Information
+    packageName: { // Keeping packageName for consistency, effectively "Guide Name" or "Trek Name"
         type: String,
         required: true
     },
@@ -29,25 +29,27 @@ const bookingSchema = new mongoose.Schema({
         default: ''
     },
     
-    // Booking Details
-    checkIn: {
-        type: Date,
-        required: false
+    // Guide Specific Details
+    bookingDate: {
+        type: String,
+        required: true // Now required for GuideBooking
     },
-    checkOut: {
-        type: Date,
-        required: false
+    bookingSlot: {
+        type: String,
+        required: true
     },
-    guests: {
-        type: Number,
-        required: false,
-        min: 1
+    bookingPeople: {
+        type: String,
+        required: true
     },
-    rooms: {
-        type: Number,
-        required: false,
-        min: 1
-    },    
+    guideEmail: {
+        type: String,
+        default: null
+    },
+    guidePhone: {
+        type: String,
+        default: null
+    },
     
     // Pricing
     baseAmount: {
@@ -62,17 +64,6 @@ const bookingSchema = new mongoose.Schema({
     totalAmount: {
         type: Number,
         required: true
-    },
-    
-    // Accommodation Details
-    accommodationType: {
-        type: String,
-        enum: ['cottage', 'villa', 'resort', 'hotel', 'homestay', 'standard'],
-        default: 'standard'
-    },
-    specialRequests: {
-        type: String,
-        default: ''
     },
     
     // Payment Information
@@ -124,46 +115,18 @@ const bookingSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: false
-    },
-    
-    // Optional: Reference to listing if applicable
-    listing: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Listing',
-        required: false
-    },
-
-    // Guide Specific Details
-    bookingDate: {
-        type: String,
-        default: null
-    },
-    bookingSlot: {
-        type: String,
-        default: null
-    },
-    bookingPeople: {
-        type: String,
-        default: null
-    },
-    guideEmail: {
-        type: String,
-        default: null
-    },
-    guidePhone: {
-        type: String,
-        default: null
     }
+
 }, {
     timestamps: true
 });
 
 // Index for faster queries
-bookingSchema.index({ guestEmail: 1 });
-bookingSchema.index({ gatewayOrderId: 1 });
-bookingSchema.index({ transactionId: 1 });
-bookingSchema.index({ gatewayPaymentId: 1 });
-bookingSchema.index({ bookingStatus: 1 });
-bookingSchema.index({ createdAt: -1 });
+guideBookingSchema.index({ guestEmail: 1 });
+guideBookingSchema.index({ gatewayOrderId: 1 });
+guideBookingSchema.index({ transactionId: 1 });
+guideBookingSchema.index({ gatewayPaymentId: 1 });
+guideBookingSchema.index({ bookingStatus: 1 });
+guideBookingSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('Booking', bookingSchema);
+module.exports = mongoose.model('GuideBooking', guideBookingSchema);

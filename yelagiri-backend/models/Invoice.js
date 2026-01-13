@@ -9,11 +9,16 @@ const invoiceSchema = new mongoose.Schema({
         // Format: INV-2025-0001
     },
     
-    // Reference to Booking
+    // Reference to Booking (can be either PackageBooking or GuideBooking)
+    bookingType: {
+        type: String,
+        required: true,
+        enum: ['PackageBooking', 'GuideBooking']
+    },
     booking: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Booking',
-        required: true
+        required: true,
+        refPath: 'bookingType'
     },
     
     // Invoice Dates
@@ -52,15 +57,39 @@ const invoiceSchema = new mongoose.Schema({
     },
     checkInDate: {
         type: Date,
-        required: true
+        required: false,
+        default: null
     },
     checkOutDate: {
         type: Date,
-        required: true
+        required: false,
+        default: null
+    },
+    // Guide/Trekking Specific
+    bookingDate: {
+        type: String,
+        default: null
+    },
+    bookingSlot: {
+        type: String,
+        default: null
+    },
+    bookingPeople: {
+        type: String,
+        default: null
+    },
+    guideEmail: {
+        type: String,
+        default: null
+    },
+    guidePhone: {
+        type: String,
+        default: null
     },
     numberOfGuests: {
         type: Number,
-        required: true
+        required: false,
+        default: null
     },
     
     // Pricing Breakdown
@@ -156,4 +185,10 @@ invoiceSchema.virtual('formattedInvoiceNumber').get(function() {
     return this.invoiceNumber;
 });
 
+// Delete cached model to ensure schema changes are picked up
+if (mongoose.models.Invoice) {
+    delete mongoose.models.Invoice;
+}
+
 module.exports = mongoose.model('Invoice', invoiceSchema);
+

@@ -1,10 +1,21 @@
 const Invoice = require('../models/Invoice');
 
+// Temporary mock mode for database operations
+const MOCK_DB_MODE = process.env.MOCK_DB_MODE === 'true';
+
 /**
  * Generate unique invoice number in format: INV-YYYY-XXXX
  * @returns {Promise<string>} Invoice number
  */
 async function generateInvoiceNumber() {
+    if (MOCK_DB_MODE) {
+        // Generate mock invoice number
+        const currentYear = new Date().getFullYear();
+        const randomNum = Math.floor(Math.random() * 9999) + 1;
+        const paddedSequence = randomNum.toString().padStart(4, '0');
+        return `INV-${currentYear}-${paddedSequence}`;
+    }
+
     const currentYear = new Date().getFullYear();
     const prefix = process.env.INVOICE_PREFIX || 'INV';
     

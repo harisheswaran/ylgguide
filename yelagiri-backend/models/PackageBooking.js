@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const bookingSchema = new mongoose.Schema({
+const packageBookingSchema = new mongoose.Schema({
     // Guest Information
     guestName: {
         type: String,
@@ -32,20 +32,20 @@ const bookingSchema = new mongoose.Schema({
     // Booking Details
     checkIn: {
         type: Date,
-        required: false
+        required: true
     },
     checkOut: {
         type: Date,
-        required: false
+        required: true
     },
     guests: {
         type: Number,
-        required: false,
+        required: true,
         min: 1
     },
     rooms: {
         type: Number,
-        required: false,
+        required: true,
         min: 1
     },    
     
@@ -131,39 +131,18 @@ const bookingSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Listing',
         required: false
-    },
-
-    // Guide Specific Details
-    bookingDate: {
-        type: String,
-        default: null
-    },
-    bookingSlot: {
-        type: String,
-        default: null
-    },
-    bookingPeople: {
-        type: String,
-        default: null
-    },
-    guideEmail: {
-        type: String,
-        default: null
-    },
-    guidePhone: {
-        type: String,
-        default: null
     }
+
 }, {
     timestamps: true
 });
 
 // Index for faster queries
-bookingSchema.index({ guestEmail: 1 });
-bookingSchema.index({ gatewayOrderId: 1 });
-bookingSchema.index({ transactionId: 1 });
-bookingSchema.index({ gatewayPaymentId: 1 });
-bookingSchema.index({ bookingStatus: 1 });
-bookingSchema.index({ createdAt: -1 });
+packageBookingSchema.index({ guestEmail: 1 });
+packageBookingSchema.index({ gatewayOrderId: 1 });
+packageBookingSchema.index({ transactionId: 1 });
+packageBookingSchema.index({ gatewayPaymentId: 1 });
+packageBookingSchema.index({ bookingStatus: 1 });
+packageBookingSchema.index({ createdAt: -1 });
 
-module.exports = mongoose.model('Booking', bookingSchema);
+module.exports = mongoose.model('PackageBooking', packageBookingSchema);

@@ -46,6 +46,8 @@ async function generateInvoicePDF(invoiceData, outputPath) {
             const textColor = '#333333';
             const lightGray = '#F8F9FA';
 
+            // ... (Previous setup code remains same, handled by main function scope)
+
             // Header with company branding
             doc.fontSize(28)
                .fillColor(primaryColor)
@@ -104,102 +106,15 @@ async function generateInvoicePDF(invoiceData, outputPath) {
                .font('Helvetica-Bold')
                .text('✓ PAYMENT RECEIVED', statusX + 10, statusY + 8);
 
-            // Package details section
-            let yPosition = 290;
-            
-            doc.fontSize(12)
-               .fillColor(primaryColor)
-               .font('Helvetica-Bold')
-               .text('PACKAGE DETAILS:', 50, yPosition);
-
-            yPosition += 25;
-
-            // Package info box
-            doc.roundedRect(50, yPosition, 495, 100, 5)
-               .fillAndStroke(lightGray, '#E9ECEF');
-
-            yPosition += 15;
-
-            doc.fontSize(14)
-               .fillColor(primaryColor)
-               .font('Helvetica-Bold')
-               .text(invoiceData.packageName, 65, yPosition);
-
-            yPosition += 20;
-
-            if (invoiceData.packageDescription) {
-                doc.fontSize(10)
-                   .fillColor(textColor)
-                   .font('Helvetica')
-                   .text(invoiceData.packageDescription, 65, yPosition, { width: 465 });
-                yPosition += 25;
+            // Branching Logic for Content
+            if (invoiceData.bookingDate) {
+                renderGuideDetails(doc, invoiceData, primaryColor, textColor, lightGray, accentColor);
+            } else {
+                renderPackageDetails(doc, invoiceData, primaryColor, textColor, lightGray, accentColor);
             }
 
-            doc.fontSize(10)
-               .fillColor(textColor)
-               .font('Helvetica')
-               .text(`Check-in: ${new Date(invoiceData.checkInDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition)
-               .text(`Check-out: ${new Date(invoiceData.checkOutDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition + 15)
-               .text(`Number of Guests: ${invoiceData.numberOfGuests}`, 65, yPosition + 30);
-
-            // Pricing table
-            yPosition = 440;
-
-            doc.fontSize(12)
-               .fillColor(primaryColor)
-               .font('Helvetica-Bold')
-               .text('PRICING BREAKDOWN:', 50, yPosition);
-
-            yPosition += 25;
-
-            // Table header
-            doc.roundedRect(50, yPosition, 495, 30, 5)
-               .fillAndStroke(primaryColor, primaryColor);
-
-            doc.fontSize(11)
-               .fillColor('#FFFFFF')
-               .font('Helvetica-Bold')
-               .text('Description', 65, yPosition + 8)
-               .text('Amount (INR)', 450, yPosition + 8);
-
-            yPosition += 30;
-
-            // Base amount row
-            doc.fontSize(10)
-               .fillColor(textColor)
-               .font('Helvetica')
-               .text('Package Base Amount', 65, yPosition + 10)
-               .text(`₹${invoiceData.baseAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
-
-            yPosition += 30;
-
-            // GST row
-            doc.text(`GST (${invoiceData.gstRate}%)`, 65, yPosition + 10)
-               .text(`₹${invoiceData.gstAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
-
-            yPosition += 30;
-
-            // Separator line
-            doc.strokeColor('#E9ECEF')
-               .lineWidth(1)
-               .moveTo(50, yPosition + 5)
-               .lineTo(545, yPosition + 5)
-               .stroke();
-
-            yPosition += 15;
-
-            // Total amount
-            doc.roundedRect(50, yPosition, 495, 40, 5)
-               .fillAndStroke(accentColor, accentColor);
-
-            doc.fontSize(14)
-               .fillColor('#FFFFFF')
-               .font('Helvetica-Bold')
-               .text('TOTAL AMOUNT', 65, yPosition + 12)
-               .text(`₹${invoiceData.totalAmount.toLocaleString('en-IN')}`, 450, yPosition + 12);
-
             // Footer
-            yPosition = 720;
+            const yPosition = 720;
 
             doc.fontSize(9)
                .fillColor('#6C757D')
@@ -228,6 +143,195 @@ async function generateInvoicePDF(invoiceData, outputPath) {
             reject(error);
         }
     });
+}
+
+// --- Helper Functions for Content Separation ---
+
+function renderPackageDetails(doc, invoiceData, primaryColor, textColor, lightGray, accentColor) {
+    let yPosition = 290;
+    
+    doc.fontSize(12)
+       .fillColor(primaryColor)
+       .font('Helvetica-Bold')
+       .text('PACKAGE DETAILS:', 50, yPosition);
+
+    yPosition += 25;
+
+    // Package info box
+    doc.roundedRect(50, yPosition, 495, 100, 5)
+       .fillAndStroke(lightGray, '#E9ECEF');
+
+    yPosition += 15;
+
+    doc.fontSize(14)
+       .fillColor(primaryColor)
+       .font('Helvetica-Bold')
+       .text(invoiceData.packageName, 65, yPosition);
+
+    yPosition += 20;
+
+    if (invoiceData.packageDescription) {
+        doc.fontSize(10)
+           .fillColor(textColor)
+           .font('Helvetica')
+           .text(invoiceData.packageDescription, 65, yPosition, { width: 465 });
+        yPosition += 25;
+    }
+
+    doc.fontSize(10)
+       .fillColor(textColor)
+       .font('Helvetica')
+       .text(`Check-in: ${new Date(invoiceData.checkInDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition)
+       .text(`Check-out: ${new Date(invoiceData.checkOutDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition + 15)
+       .text(`Number of Guests: ${invoiceData.numberOfGuests}`, 65, yPosition + 30);
+
+    // Pricing table
+    yPosition = 440;
+
+    doc.fontSize(12)
+       .fillColor(primaryColor)
+       .font('Helvetica-Bold')
+       .text('PRICING BREAKDOWN:', 50, yPosition);
+
+    yPosition += 25;
+
+    // Table header
+    doc.roundedRect(50, yPosition, 495, 30, 5)
+       .fillAndStroke(primaryColor, primaryColor);
+
+    doc.fontSize(11)
+       .fillColor('#FFFFFF')
+       .font('Helvetica-Bold')
+       .text('Description', 65, yPosition + 8)
+       .text('Amount (INR)', 450, yPosition + 8);
+
+    yPosition += 30;
+
+    // Base amount row
+    doc.fontSize(10)
+       .fillColor(textColor)
+       .font('Helvetica')
+       .text('Package Base Amount', 65, yPosition + 10)
+       .text(`₹${invoiceData.baseAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
+
+    yPosition += 30;
+
+    // GST row
+    doc.text(`GST (${invoiceData.gstRate}%)`, 65, yPosition + 10)
+       .text(`₹${invoiceData.gstAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
+
+    yPosition += 30;
+
+    // Separator line
+    doc.strokeColor('#E9ECEF')
+       .lineWidth(1)
+       .moveTo(50, yPosition + 5)
+       .lineTo(545, yPosition + 5)
+       .stroke();
+
+    yPosition += 15;
+
+    // Total amount
+    doc.roundedRect(50, yPosition, 495, 40, 5)
+       .fillAndStroke(accentColor, accentColor);
+
+    doc.fontSize(14)
+       .fillColor('#FFFFFF')
+       .font('Helvetica-Bold')
+       .text('TOTAL AMOUNT', 65, yPosition + 12)
+       .text(`₹${invoiceData.totalAmount.toLocaleString('en-IN')}`, 450, yPosition + 12);
+}
+
+function renderGuideDetails(doc, invoiceData, primaryColor, textColor, lightGray, accentColor) {
+    let yPosition = 290;
+    
+    doc.fontSize(12)
+       .fillColor(primaryColor)
+       .font('Helvetica-Bold')
+       .text('TREKKING DETAILS:', 50, yPosition);
+
+    yPosition += 25;
+
+    // Guide info box
+    doc.roundedRect(50, yPosition, 495, 120, 5) // Slightly larger
+       .fillAndStroke('#FBF8F1', '#D4C597');
+
+    yPosition += 15;
+
+    doc.fontSize(14)
+       .fillColor(primaryColor)
+       .font('Helvetica-Bold')
+       .text('Trekking Guide Service', 65, yPosition);
+
+    yPosition += 25;
+
+    doc.fontSize(10)
+       .fillColor(textColor)
+       .font('Helvetica')
+       .text(`Experience: ${invoiceData.packageName}`, 65, yPosition)
+       .text(`Trek Date: ${new Date(invoiceData.bookingDate).toLocaleDateString('en-IN', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}`, 65, yPosition + 15)
+       .text(`Time Slot: ${invoiceData.bookingSlot}`, 65, yPosition + 30)
+       .text(`Group Size: ${invoiceData.bookingPeople}`, 65, yPosition + 45);
+
+    if (invoiceData.guidePhone) {
+        doc.text(`Guide Contact: ${invoiceData.guidePhone}`, 65, yPosition + 60);
+    }
+
+    // Pricing table
+    yPosition = 440;
+
+    doc.fontSize(12)
+       .fillColor(primaryColor)
+       .font('Helvetica-Bold')
+       .text('PRICING BREAKDOWN:', 50, yPosition);
+
+    yPosition += 25;
+
+    // Table header
+    doc.roundedRect(50, yPosition, 495, 30, 5)
+       .fillAndStroke('#4A5D23', '#4A5D23'); // Darker green for treks
+
+    doc.fontSize(11)
+       .fillColor('#FFFFFF')
+       .font('Helvetica-Bold')
+       .text('Description', 65, yPosition + 8)
+       .text('Amount (INR)', 450, yPosition + 8);
+
+    yPosition += 30;
+
+    // Base amount row
+    doc.fontSize(10)
+       .fillColor(textColor)
+       .font('Helvetica')
+       .text('Base Amount', 65, yPosition + 10)
+       .text(`₹${invoiceData.baseAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
+
+    yPosition += 30;
+
+    // GST row
+    doc.text(`GST (${invoiceData.gstRate}%)`, 65, yPosition + 10)
+       .text(`₹${invoiceData.gstAmount.toLocaleString('en-IN')}`, 450, yPosition + 10);
+
+    yPosition += 30;
+
+    // Separator line
+    doc.strokeColor('#E9ECEF')
+       .lineWidth(1)
+       .moveTo(50, yPosition + 5)
+       .lineTo(545, yPosition + 5)
+       .stroke();
+
+    yPosition += 15;
+
+    // Total amount
+    doc.roundedRect(50, yPosition, 495, 40, 5)
+       .fillAndStroke('#8FA35F', '#8FA35F'); // Trek specific green
+
+    doc.fontSize(14)
+       .fillColor('#FFFFFF')
+       .font('Helvetica-Bold')
+       .text('TOTAL AMOUNT PAID', 65, yPosition + 12)
+       .text(`₹${invoiceData.totalAmount.toLocaleString('en-IN')}`, 450, yPosition + 12);
 }
 
 module.exports = { generateInvoicePDF };

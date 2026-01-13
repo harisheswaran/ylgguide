@@ -4,7 +4,9 @@ const connectDB = require('./config/db');
 const Category = require('./models/Category');
 const Listing = require('./models/Listing');
 
-dotenv.config();
+dotenv.config({ override: true });
+
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/yelagiri-guide';
 
 connectDB();
 

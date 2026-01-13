@@ -4,6 +4,9 @@ const Invoice = require('../models/Invoice');
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 
+// Temporary mock mode for database operations
+const MOCK_DB_MODE = process.env.MOCK_DB_MODE === 'true';
+
 /**
  * Send booking confirmation email with invoice
  * @param {Object} booking - Booking object
@@ -21,7 +24,17 @@ async function sendBookingConfirmationEmail(booking, invoice) {
             checkOutDate: booking.checkOut,
             guests: booking.guests,
             totalAmount: booking.totalAmount,
-            invoiceNumber: invoice.invoiceNumber
+            invoiceNumber: invoice.invoiceNumber,
+            // Include financial breakdown for guide bookings
+            baseAmount: invoice.baseAmount,
+            gstAmount: invoice.gstAmount,
+            // Trekking specific fields
+            bookingDate: booking.bookingDate,
+            bookingSlot: booking.bookingSlot,
+            bookingPeople: booking.bookingPeople,
+            guideEmail: booking.guideEmail,
+            guidePhone: booking.guidePhone,
+            invoiceUrl: `${process.env.NEXT_PUBLIC_API_URL || 'https://goyelagiri.com'}/api/invoices/${invoice.invoiceNumber}/download`
         };
 
         const htmlContent = getBookingConfirmationEmail(emailData);
@@ -50,11 +63,13 @@ async function sendBookingConfirmationEmail(booking, invoice) {
 
         const result = await transporter.sendMail(mailOptions);
 
-        // Update invoice email status
-        invoice.emailSent = true;
-        invoice.emailSentAt = new Date();
-        invoice.emailAttempts = (invoice.emailAttempts || 0) + 1;
-        await invoice.save();
+        // Update invoice email status (skip in mock mode)
+        if (!MOCK_DB_MODE) {
+            invoice.emailSent = true;
+            invoice.emailSentAt = new Date();
+            invoice.emailAttempts = (invoice.emailAttempts || 0) + 1;
+            await invoice.save();
+        }
 
         console.log('✅ Booking confirmation email sent to:', booking.guestEmail);
         
@@ -69,8 +84,8 @@ async function sendBookingConfirmationEmail(booking, invoice) {
     } catch (error) {
         console.error('❌ Error sending booking confirmation email:', error);
         
-        // Update invoice email attempts
-        if (invoice) {
+        // Update invoice email attempts (skip in mock mode)
+        if (!MOCK_DB_MODE && invoice) {
             invoice.emailAttempts = (invoice.emailAttempts || 0) + 1;
             await invoice.save();
         }
@@ -86,14 +101,29 @@ async function sendBookingConfirmationEmail(booking, invoice) {
  */
 async function resendInvoiceEmail(invoiceId) {
     try {
-        const invoice = await Invoice.findById(invoiceId).populate('booking');
+        let invoice;
         
-        if (!invoice) {
-            throw new Error('Invoice not found');
-        }
+        if (MOCK_DB_MODE) {
+            // Mock invoice for testing
+            invoice = {
+                _id: invoiceId,
+                invoiceNumber: `INV-MOCK-${Date.now()}`,
+                booking: {
+                    guestName: 'Mock User',
+                    guestEmail: 'mock@example.com',
+                    packageName: 'Mock Package'
+                }
+            };
+        } else {
+            invoice = await Invoice.findById(invoiceId).populate('booking');
+            
+            if (!invoice) {
+                throw new Error('Invoice not found');
+            }
 
-        if (!invoice.booking) {
-            throw new Error('Booking not found for invoice');
+            if (!invoice.booking) {
+                throw new Error('Booking not found for invoice');
+            }
         }
 
         return await sendBookingConfirmationEmail(invoice.booking, invoice);

@@ -362,26 +362,64 @@ export default function TripPackages() {
         }, 2500);
     };
 
-    const handleAddReview = (e) => {
+    const handleAddReview = async (e) => {
         e.preventDefault();
         if (!newReview.comment || !newReview.user) return;
 
-        const updatedPackages = packages.map(pkg => {
-            if (pkg.id === selectedPackage.id) {
-                return {
-                    ...pkg,
-                    reviewsCount: pkg.reviewsCount + 1,
-                    reviews: [{
-                        ...newReview,
-                        date: new Date().toISOString().split('T')[0]
-                    }, ...pkg.reviews]
-                };
-            }
-            return pkg;
-        });
-        setPackages(updatedPackages);
-        setSelectedPackage(updatedPackages.find(p => p.id === selectedPackage.id));
-        setNewReview({ rating: 5, comment: '', user: '' });
+        try {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const response = await fetch(`${apiUrl}/api/reviews`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    listingId: selectedPackage.id,
+                    user: newReview.user,
+                    rating: newReview.rating,
+                    comment: newReview.comment
+                })
+            });
+
+            const data = await response.json();
+            
+            // Even if API fails (e.g. mock mode without real DB), update local state for the user
+            const updatedPackages = packages.map(pkg => {
+                if (pkg.id === selectedPackage.id) {
+                    return {
+                        ...pkg,
+                        reviewsCount: (pkg.reviewsCount || 0) + 1,
+                        reviews: [{
+                            ...newReview,
+                            date: new Date().toISOString().split('T')[0]
+                        }, ...(pkg.reviews || [])]
+                    };
+                }
+                return pkg;
+            });
+            setPackages(updatedPackages);
+            setSelectedPackage(updatedPackages.find(p => p.id === selectedPackage.id));
+            setNewReview({ rating: 5, comment: '', user: '' });
+            
+            // Show success message or just keep modal open to see the new review
+        } catch (error) {
+            console.error('Failed to add review:', error);
+            // Fallback to local state update anyway for UX in mock mode
+            const updatedPackages = packages.map(pkg => {
+                if (pkg.id === selectedPackage.id) {
+                    return {
+                        ...pkg,
+                        reviewsCount: (pkg.reviewsCount || 0) + 1,
+                        reviews: [{
+                            ...newReview,
+                            date: new Date().toISOString().split('T')[0]
+                        }, ...(pkg.reviews || [])]
+                    };
+                }
+                return pkg;
+            });
+            setPackages(updatedPackages);
+            setSelectedPackage(updatedPackages.find(p => p.id === selectedPackage.id));
+            setNewReview({ rating: 5, comment: '', user: '' });
+        }
     };
 
     return (
@@ -644,7 +682,7 @@ export default function TripPackages() {
                                     <Sparkles className="w-10 h-10 text-gray-300" />
                                 </div>
                                 <h3 className="text-xl font-bold text-[#1F3D2B] mb-2">No matches found</h3>
-                                <p className="text-slate-400 text-sm max-w-xs mx-auto mb-8">Try adjusting your filters or price range to find what you're looking for.</p>
+                                <p className="text-slate-400 text-sm max-w-xs mx-auto mb-8">Try adjusting your filters or price range to find what you&apos;re looking for.</p>
                                 <button 
                                     onClick={() => {
                                         setCategoryFilter('All');
@@ -699,6 +737,12 @@ export default function TripPackages() {
                                                                 ))}
                                                             </div>
                                                             <span className="text-xs text-slate-400 font-medium">• {pkg.duration}</span>
+                                                            <button 
+                                                                onClick={() => handleViewReviews(pkg)}
+                                                                className="text-xs text-[#BFA76A] font-bold hover:underline flex items-center gap-1 ml-2"
+                                                            >
+                                                                <MessageSquare className="w-3 h-3" /> {pkg.reviewsCount} Reviews
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     {/* Favorite Button */}
@@ -826,7 +870,7 @@ export default function TripPackages() {
                                                 {/* Inclusions */}
                                                 <div>
                                                     <h3 className="text-sm font-bold text-[#1F3D2B] uppercase tracking-widest mb-4 flex items-center gap-2">
-                                                        <CheckCircle2 className="w-4 h-4 text-green-600" /> What's Included
+                                                        <CheckCircle2 className="w-4 h-4 text-green-600" /> What&apos;s Included
                                                     </h3>
                                                     <ul className="space-y-3">
                                                         {selectedPackage.includes.map((item, i) => (

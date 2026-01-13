@@ -5,6 +5,17 @@ const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
 
+// In-memory store for mock invoices
+global.mockInvoices = global.mockInvoices || {};
+
+// Temporary mock mode for database operations
+const MOCK_DB_MODE = process.env.MOCK_DB_MODE === 'true';
+
+/**
+ * Create invoice for a booking
+ * @param {Object} booking - Booking object
+ * @returns {Promise<Object>} Created invoice
+ */
 /**
  * Create invoice for a booking
  * @param {Object} booking - Booking object
@@ -12,56 +23,58 @@ const fs = require('fs');
  */
 async function createInvoice(booking) {
     try {
-        // Check if invoice already exists for this booking
-        const existingInvoice = await Invoice.findOne({ booking: booking._id });
-        if (existingInvoice) {
-            console.log('Invoice already exists for booking:', booking._id);
-            // If it exists but PDF is missing, trigger regen
-            if (!existingInvoice.pdfPath || !fs.existsSync(existingInvoice.pdfPath)) {
-                 console.log('Invoice PDF missing, regenerating...');
-                 // We don't await this to keep response fast, but for robustness in test we might want to.
-                 // Better to just let generateInvoicePDFAsync run.
-                 generateInvoicePDFAsync(existingInvoice);
+        // Check if invoice already exists for this booking (skip in mock mode)
+        if (!MOCK_DB_MODE) {
+            const existingInvoice = await Invoice.findOne({ booking: booking._id });
+            if (existingInvoice) {
+                console.log('Invoice already exists for booking:', booking._id);
+                // If it exists but PDF is missing, trigger regen
+                if (!existingInvoice.pdfPath || !fs.existsSync(existingInvoice.pdfPath)) {
+                     console.log('Invoice PDF missing, regenerating...');
+                     generateInvoicePDFAsync(existingInvoice);
+                }
+                return existingInvoice;
             }
-            return existingInvoice;
         }
 
         // Generate unique invoice number
-        const invoiceNumber = await generateInvoiceNumber();
+        const invoiceNumber = MOCK_DB_MODE ? `INV-MOCK-${Date.now()}` : await generateInvoiceNumber();
 
         // Calculate GST
         const gstRate = parseFloat(process.env.GST_RATE) || 18;
         const baseAmount = booking.baseAmount || booking.totalAmount / (1 + gstRate / 100);
         const gstAmount = booking.taxAmount || (baseAmount * gstRate) / 100;
 
-        // Create invoice
-        const invoice = new Invoice({
-            invoiceNumber,
-            booking: booking._id,
-            invoiceDate: new Date(),
-            dueDate: new Date(), // Immediate payment
-            guestName: booking.guestName,
-            guestEmail: booking.guestEmail,
-            guestPhone: booking.guestPhone,
-            packageName: booking.packageName,
-            packageDescription: booking.packageDescription || '',
-            checkInDate: booking.checkIn,
-            checkOutDate: booking.checkOut,
-            numberOfGuests: booking.guests,
-            baseAmount: baseAmount,
-            gstRate: gstRate,
-            gstAmount: gstAmount,
-            totalAmount: booking.totalAmount,
-            paymentStatus: 'paid',
-            paymentMethod: booking.provider || 'Mock',
-            gatewayPaymentId: booking.gatewayPaymentId,
-            generationStatus: 'pending'
-        });
+        let invoiceData;
+        const isGuide = !!booking.bookingDate;
 
-        await invoice.save();
+        if (isGuide) {
+            invoiceData = prepareGuideInvoiceData(booking, invoiceNumber, baseAmount, gstRate, gstAmount);
+        } else {
+            invoiceData = preparePackageInvoiceData(booking, invoiceNumber, baseAmount, gstRate, gstAmount);
+        }
 
-        // Generate PDF asynchronously
-        await generateInvoicePDFAsync(invoice);
+        let invoice;
+        if (MOCK_DB_MODE) {
+            invoice = {
+                _id: invoiceNumber,
+                ...invoiceData,
+                generationStatus: 'generated'
+            };
+        } else {
+            invoice = new Invoice({
+                ...invoiceData,
+                generationStatus: 'pending'
+            });
+        }
+
+        // Save and Generate
+        if (MOCK_DB_MODE) {
+            await generateInvoicePDFAsync(invoice);
+        } else {
+            await invoice.save();
+            generateInvoicePDFAsync(invoice);
+        }
 
         return invoice;
     } catch (error) {
@@ -70,15 +83,83 @@ async function createInvoice(booking) {
     }
 }
 
+function prepareGuideInvoiceData(booking, invoiceNumber, baseAmount, gstRate, gstAmount) {
+    // Extract number of guests from bookingPeople string (e.g., "2-4 People" -> 2)
+    let numberOfGuests = 1;
+    if (booking.bookingPeople) {
+        const match = booking.bookingPeople.match(/(\d+)/);
+        if (match) {
+            numberOfGuests = parseInt(match[1], 10);
+        }
+    }
+    
+    return {
+        invoiceNumber,
+        bookingType: 'GuideBooking',
+        booking: booking._id,
+        invoiceDate: new Date(),
+        dueDate: new Date(),
+        guestName: booking.guestName,
+        guestEmail: booking.guestEmail,
+        guestPhone: booking.guestPhone,
+        packageName: booking.packageName,
+        packageDescription: booking.packageDescription || '',
+        // Guide Specific
+        bookingDate: booking.bookingDate,
+        bookingSlot: booking.bookingSlot,
+        bookingPeople: booking.bookingPeople,
+        guideEmail: booking.guideEmail,
+        guidePhone: booking.guidePhone,
+        numberOfGuests: numberOfGuests,
+        // Common Financials
+        baseAmount,
+        gstRate,
+        gstAmount,
+        totalAmount: booking.totalAmount,
+        paymentStatus: 'paid',
+        paymentMethod: booking.provider || 'Mock',
+        gatewayPaymentId: booking.gatewayPaymentId
+    };
+}
+
+function preparePackageInvoiceData(booking, invoiceNumber, baseAmount, gstRate, gstAmount) {
+    return {
+        invoiceNumber,
+        bookingType: 'PackageBooking',
+        booking: booking._id,
+        invoiceDate: new Date(),
+        dueDate: new Date(),
+        guestName: booking.guestName,
+        guestEmail: booking.guestEmail,
+        guestPhone: booking.guestPhone,
+        packageName: booking.packageName,
+        packageDescription: booking.packageDescription || '',
+        // Package Specific
+        checkInDate: booking.checkIn,
+        checkOutDate: booking.checkOut,
+        numberOfGuests: booking.guests,
+        // Common Financials
+        baseAmount,
+        gstRate,
+        gstAmount,
+        totalAmount: booking.totalAmount,
+        paymentStatus: 'paid',
+        paymentMethod: booking.provider || 'Mock',
+        gatewayPaymentId: booking.gatewayPaymentId
+    };
+}
+
 /**
- * Generate PDF for invoice (async)
+ * Generate PDF for invoice (async compatible)
  * @param {Object} invoice - Invoice object
  */
 async function generateInvoicePDFAsync(invoice) {
     try {
         // Update status to generating
         invoice.generationStatus = 'generating';
-        await invoice.save();
+        if (!MOCK_DB_MODE && typeof invoice.save === 'function') {
+            await invoice.save();
+        }
 
         // Define PDF path (Absolute Path is CRITICAL for reliability)
         const invoiceDir = process.env.INVOICE_STORAGE_PATH 
@@ -98,16 +179,25 @@ async function generateInvoicePDFAsync(invoice) {
 
         // Update invoice with PDF path
         invoice.pdfPath = filePath;
-        invoice.pdfUrl = `/api/invoices/${invoice._id}/download`;
+        invoice.pdfUrl = `/api/invoices/${invoice._id || 'mock'}/download`;
         invoice.generationStatus = 'generated';
         invoice.generatedAt = new Date();
-        await invoice.save();
+        
+        if (!MOCK_DB_MODE && typeof invoice.save === 'function') {
+            await invoice.save();
+        } else if (MOCK_DB_MODE) {
+            // Save to in-memory store
+            global.mockInvoices[invoice.invoiceNumber] = invoice;
+            console.log(`🧠 Saved mock invoice ${invoice.invoiceNumber} to memory store`);
+        }
 
-        console.log('Invoice PDF generated successfully:', invoice.invoiceNumber);
+        console.log('✅ Invoice PDF generated successfully:', invoice.invoiceNumber);
     } catch (error) {
-        console.error('Error generating invoice PDF:', error);
+        console.error('❌ Error generating invoice PDF:', error);
         invoice.generationStatus = 'failed';
-        await invoice.save();
+        if (!MOCK_DB_MODE && typeof invoice.save === 'function') {
+            await invoice.save();
+        }
     }
 }
 
@@ -118,6 +208,16 @@ async function generateInvoicePDFAsync(invoice) {
  */
 async function getInvoiceById(invoiceId) {
     try {
+        // Check in-memory mock store first
+        if (global.mockInvoices && global.mockInvoices[invoiceId]) {
+            console.log(`🧠 Found invoice ${invoiceId} in mock store`);
+            // Return object with necessary structure
+            return {
+                ...global.mockInvoices[invoiceId],
+                toObject: () => global.mockInvoices[invoiceId]
+            };
+        }
+
         const invoice = await Invoice.findById(invoiceId).populate('booking');
         return invoice;
     } catch (error) {
