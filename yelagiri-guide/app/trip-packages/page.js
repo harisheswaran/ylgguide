@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 import { 
     Star, 
     Clock, 
@@ -37,157 +38,17 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-const initialPackages = [
-    {
-        id: 'prime',
-        title: 'Prime Package',
-        type: 'ESSENTIAL LUXURY',
-        duration: '2 Days, 1 Night',
-        price: '₹7,499',
-        rating: 4.8,
-        stars: 4,
-        reviewsCount: 124,
-        image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
-        icon: <User className="w-5 h-5" />,
-        includes: ['Standard Mountain View Room', 'Buffet Breakfast', 'Guided Nature Walk', 'Evening Bonfire'],
-        amenities: ['Wifi', 'Parking', 'Restaurant'],
-        longDescription: "Escape to the hills with our Prime Package, perfect for a quick getaway. Enjoy a cozy stay with stunning mountain views, delicious breakfast, and immersive nature activities.",
-        exclusions: ['Lunch and Dinner', 'Personal Expenses', 'Travel Insurance'],
-        offers: ['10% off on Spa', 'Free Welcome Drink'],
-        reviews: [
-            { user: "Arun K.", rating: 5, comment: "Amazing experience for the price. The mountain view was breathtaking!", date: "2024-12-10" },
-            { user: "Sanjana M.", rating: 4, comment: "Good service and delicious breakfast. Highly recommend.", date: "2024-11-25" }
-        ]
-    },
-    {
-        id: 'gold',
-        title: 'Gold Package',
-        type: 'COMFORT+',
-        duration: '3 Days, 2 Nights',
-        price: '₹12,999',
-        rating: 4.9,
-        stars: 5,
-        reviewsCount: 89,
-        image: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=800&q=80',
-        icon: <Trophy className="w-5 h-5" />,
-        includes: ['Deluxe Heritage Suite', 'Half-Board Dining', 'Boat Ride at Punganoor Lake', 'Private Sightseeing'],
-        amenities: ['Wifi', 'Pool', 'Spa', 'Parking'],
-        longDescription: "Indulge in comfort with our Gold Package. Stay in a heritage suite, savor gourmet meals, and explore the best of Yelagiri with a private boat ride and sightseeing tour.",
-        exclusions: ['Alcoholic Beverages', 'Tips and Gratuities'],
-        offers: ['Complimentary High Tea', 'Late Checkout (subject to availability)'],
-        reviews: [
-            { user: "Vikram R.", rating: 5, comment: "The heritage suite felt so royal. The boat ride was very peaceful.", date: "2024-12-15" }
-        ]
-    },
-    {
-        id: 'premium',
-        title: 'Premium Package',
-        type: 'ELITE EXPERIENCE',
-        duration: '4 Days, 3 Nights',
-        price: '₹19,999',
-        rating: 5.0,
-        stars: 5,
-        reviewsCount: 56,
-        image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
-        icon: <ShieldCheck className="w-5 h-5" />,
-        includes: ['Presidential Villa stay', 'All-Inclusive Meals', 'Personal Butler Service', 'Exclusive Trekking Expedition'],
-        amenities: ['Wifi', 'Pool', 'Spa', 'Gym', 'Bar', 'Parking'],
-        longDescription: "Experience the pinnacle of luxury with our Premium Package. A presidential villa, personal butler, and exclusive adventures await you for a truly elite vacation.",
-        exclusions: ['Airfare', 'Personal Shopping'],
-        offers: ['Free Couple Spa Session', 'Champagne on Arrival'],
-        reviews: [
-            { user: "Elena D.", rating: 5, comment: "Best stay ever! The personal butler made everything so easy.", date: "2024-12-20" }
-        ]
-    },
-    {
-        id: 'family',
-        title: 'Family Package',
-        type: 'MEMORABLE MOMENTS',
-        duration: '3 Days, 2 Nights',
-        price: '₹15,499',
-        rating: 4.7,
-        stars: 4,
-        reviewsCount: 156,
-        image: 'https://images.unsplash.com/photo-1511895426328-dc8714191300?auto=format&fit=crop&w=800&q=80',
-        icon: <Users className="w-5 h-5" />,
-        includes: ['Interconnected Family Suite', 'Kids Menu & Activities', 'Nature Park Visit', 'Outdoor Games Session'],
-        amenities: ['Wifi', 'Pool', 'Play Area', 'Parking'],
-        longDescription: "Create lasting memories with your loved ones. Our Family Package offers spacious suites, fun activities for kids, and nature excursions that everyone will enjoy.",
-        exclusions: ['Extra Bed Charges', 'Babysitting Services'],
-        offers: ['Kids Eat Free', 'Free Family Photo Session'],
-        reviews: [
-            { user: "The Reddys", rating: 5, comment: "Perfect for kids! They loved the nature park and the games.", date: "2024-12-05" }
-        ]
-    },
-    {
-        id: 'couples',
-        title: 'Couples Package',
-        type: 'ROMANTIC RETREAT',
-        duration: '2 Days, 1 Night',
-        price: '₹9,999',
-        rating: 4.9,
-        stars: 5,
-        reviewsCount: 210,
-        image: 'https://images.unsplash.com/photo-1516589174184-e6646f6588a0?auto=format&fit=crop&w=800&q=80',
-        icon: <Heart className="w-5 h-5" />,
-        includes: ['Romantic Room Decor', 'Candle Light Dinner', 'Spa for Two', 'Sunset View Point Access'],
-        amenities: ['Wifi', 'Spa', 'Jacuzzi', 'Parking'],
-        longDescription: "Ignite the romance with our Couples Package. Enjoy intimate dinners, soothing spa treatments, and breathtaking sunsets in a setting designed for love.",
-        exclusions: ['Photography', 'Flower Bouquets'],
-        offers: ['Complimentary Wine', 'Room Upgrade (subject to availability)'],
-        reviews: [
-            { user: "Priya & Rahul", rating: 5, comment: "The candle light dinner was so romantic. A dream come true.", date: "2024-12-18" }
-        ]
-    },
-    {
-        id: 'friends',
-        title: 'Friends Adventure',
-        type: 'GROUP FUN',
-        duration: '3 Days, 2 Nights',
-        price: '₹6,499 pp',
-        rating: 4.8,
-        stars: 3,
-        reviewsCount: 95,
-        image: 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=800&q=80',
-        icon: <Users className="w-5 h-5" />,
-        includes: ['Group Cabin / Cottages', 'Barbecue Night', 'Adventure Sports Access', 'Night Safari Trek'],
-        amenities: ['Wifi', 'Bonfire', 'Parking', 'Games'],
-        longDescription: "Gather your squad for an unforgettable adventure! Our Friends Package includes group accommodation, thrilling sports, and a lively barbecue night.",
-        exclusions: ['Equipment Rental Damage', 'Personal Gear'],
-        offers: ['1 Free Adventure Activity', 'Group Discount on F&B'],
-        reviews: [
-            { user: "Aditya & Gang", rating: 5, comment: "Barbecue night was the highlight! Great fun with friends.", date: "2024-12-22" }
-        ]
-    },
-    {
-        id: 'honeymoon',
-        title: 'Honeymoon Package',
-        type: 'ETERNAL LOVE',
-        duration: '5 Days, 4 Nights',
-        price: '₹29,999',
-        rating: 5.0,
-        stars: 5,
-        reviewsCount: 42,
-        image: 'https://images.unsplash.com/photo-1469796466635-455ede028684?auto=format&fit=crop&w=800&q=80',
-        icon: <Heart className="w-5 h-5" />,
-        includes: ['Ultra-Luxury Glass Villa', 'Private Dining Under Stars', 'Exotic Couple Rituals', 'Exclusive Gifts & Wine'],
-        amenities: ['Wifi', 'Private Pool', 'Spa', 'Butler', 'Parking'],
-        longDescription: "Celebrate your union in ultimate luxury. Our Honeymoon Package features a glass villa, private star-lit dining, and exclusive romantic rituals.",
-        exclusions: ['Special Requests', 'External transport'],
-        offers: ['Chauffeur Driven Pick-up', 'Customized Honeymoon Cake'],
-        reviews: [
-            { user: "Mr. & Mrs. Kapoor", rating: 5, comment: "Unforgettable honeymoon. The glass villa was magical.", date: "2024-12-23" }
-        ]
-    }
-];
+
 
 // Trip Packages Component 
 export default function TripPackages() {
     const router = useRouter();
+    const { user } = useAuth();
     const searchParams = useSearchParams();
     const showFavoritesOnly = searchParams.get('filter') === 'favorites';
 
-    const [packages, setPackages] = useState(initialPackages);
+    const [packages, setPackages] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [bookingStep, setBookingStep] = useState('none'); // none, reviews, form, payment, success
     const [newReview, setNewReview] = useState({ rating: 5, comment: '', user: '' });
@@ -199,6 +60,24 @@ export default function TripPackages() {
     const [phone, setPhone] = useState('');
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
+
+    useEffect(() => {
+        const fetchPackages = async () => {
+            setLoading(true);
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/packages`);
+                const json = await res.json();
+                if (json.success) {
+                    setPackages(json.data);
+                }
+            } catch (err) {
+                console.error('Failed to fetch packages:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPackages();
+    }, []);
 
     // Favorites State
     const [favorites, setFavorites] = useState([]);
@@ -230,6 +109,7 @@ export default function TripPackages() {
     const [selectedStars, setSelectedStars] = useState([]);
     const [selectedAmenities, setSelectedAmenities] = useState([]);
     const [selectedRatings, setSelectedRatings] = useState([]);
+    const [selectedLocations, setSelectedLocations] = useState([]);
 
     // Derived Data
     const filteredPackages = packages
@@ -262,10 +142,13 @@ export default function TripPackages() {
                  return true;
             });
 
-            // 7. Favorites Filter (from URL)
+            // 7. Location Filter
+            const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(pkg.locationName);
+
+            // 8. Favorites Filter (from URL)
             const matchesFavorite = !showFavoritesOnly || favorites.includes(pkg.id);
 
-            return matchesCategory && matchesDuration && matchesPrice && matchesStars && matchesAmenities && matchesRating && matchesFavorite;
+            return matchesCategory && matchesDuration && matchesPrice && matchesStars && matchesAmenities && matchesRating && matchesLocation && matchesFavorite;
         })
         .sort((a, b) => {
             if (sortBy === 'Price: Low to High') {
@@ -300,8 +183,19 @@ export default function TripPackages() {
         { label: '8+ Very Good', value: '8+' },
         { label: '7+ Good', value: '7+' }
     ];
+    const locationOptions = [
+        { name: 'Athanavur', icon: '🏪' },
+        { name: 'Nilavur', icon: '🏡' },
+        { name: 'Swamimalai', icon: '🏔️' },
+        { name: 'Punganoor', icon: '⛵' },
+        { name: 'Mangalam', icon: '🌲' }
+    ];
 
     const handleBookNow = (pkg) => {
+        if (!user) {
+            router.push(`/signin?redirect=/trip-packages`);
+            return;
+        }
         // Navigate to the new booking page with package info
         const params = new URLSearchParams({
             id: pkg.id,
@@ -313,11 +207,19 @@ export default function TripPackages() {
     };
 
     const handleViewReviews = (pkg) => {
+        if (!user) {
+            router.push(`/signin?redirect=/trip-packages`);
+            return;
+        }
         setSelectedPackage(pkg);
         setBookingStep('reviews');
     };
 
     const handleViewDetails = (pkg) => {
+        if (!user) {
+            router.push(`/signin?redirect=/trip-packages`);
+            return;
+        }
         setSelectedPackage(pkg);
         setBookingStep('details');
     };
@@ -364,6 +266,10 @@ export default function TripPackages() {
 
     const handleAddReview = async (e) => {
         e.preventDefault();
+        if (!user) {
+            router.push(`/signin?redirect=/trip-packages`);
+            return;
+        }
         if (!newReview.comment || !newReview.user) return;
 
         try {
@@ -528,6 +434,36 @@ export default function TripPackages() {
                             </div>
                         </div>
 
+                        {/* Location Filter */}
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-[#1F3D2B]">Location</h3>
+                            <div className="space-y-3">
+                                {locationOptions.map((loc) => (
+                                    <label key={loc.name} className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedLocations.includes(loc.name) ? 'border-[#1F3D2B] bg-[#1F3D2B]' : 'border-gray-300 group-hover:border-[#1F3D2B]'}`}>
+                                            {selectedLocations.includes(loc.name) && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                                        </div>
+                                        <input 
+                                            type="checkbox" 
+                                            className="hidden"
+                                            checked={selectedLocations.includes(loc.name)}
+                                            onChange={() => {
+                                                if(selectedLocations.includes(loc.name)) {
+                                                    setSelectedLocations(selectedLocations.filter(l => l !== loc.name));
+                                                } else {
+                                                    setSelectedLocations([...selectedLocations, loc.name]);
+                                                }
+                                            }}
+                                        />
+                                        <span className="text-sm text-gray-600 font-medium group-hover:text-[#1F3D2B] transition-colors flex items-center gap-2">
+                                            <span className="text-lg opacity-70 group-hover:opacity-100 transition-opacity">{loc.icon}</span>
+                                            {loc.name}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Type of Stay (Categories) */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-[#1F3D2B]">Type of stay</h3>
@@ -613,6 +549,7 @@ export default function TripPackages() {
                                 setSelectedStars([]);
                                 setSelectedAmenities([]);
                                 setSelectedRatings([]);
+                                setSelectedLocations([]);
                             }}
                             className="w-full py-3 bg-gray-100 text-gray-500 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-red-50 hover:text-red-500 hover:border-red-100 border border-transparent transition-colors flex items-center justify-center gap-2"
                         >
@@ -687,9 +624,10 @@ export default function TripPackages() {
                                     onClick={() => {
                                         setCategoryFilter('All');
                                         setPriceRange(50000);
-                                        setSelectedStars([]);
+                                setSelectedStars([]);
                                         setSelectedAmenities([]);
                                         setSelectedRatings([]);
+                                        setSelectedLocations([]);
                                     }}
                                     className="px-8 py-3 bg-[#1F3D2B] text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#2a523a] transition-colors"
                                 >
@@ -737,6 +675,9 @@ export default function TripPackages() {
                                                                 ))}
                                                             </div>
                                                             <span className="text-xs text-slate-400 font-medium">• {pkg.duration}</span>
+                                                            <span className="text-xs text-[#BFA76A] font-bold px-2 py-0.5 bg-amber-50 rounded ml-2 flex items-center gap-1">
+                                                                <Map className="w-3 h-3" /> {pkg.locationName || 'Yelagiri'}
+                                                            </span>
                                                             <button 
                                                                 onClick={() => handleViewReviews(pkg)}
                                                                 className="text-xs text-[#BFA76A] font-bold hover:underline flex items-center gap-1 ml-2"

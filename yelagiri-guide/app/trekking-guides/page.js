@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../context/AuthContext';
 import { 
     Star, 
     Clock, 
@@ -34,82 +35,11 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 
-const dummyGuides = [
-    {
-        id: '1',
-        name: 'Arjun Swamy',
-        bio: 'Local trekker with 10+ years of experience in Yelagiri hills. Specialist in night treks and bird watching. I will take you to the most unseen caves of Swamimalai hills and ensure you witness the best sunrise of your life.',
-        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=400&q=80',
-        videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-        certifications: ['Certified Wilderness First Responder', 'Advanced Mountaineering Course', 'Eco-Tourism Specialist'],
-        languages: ['English', 'Tamil', 'Hindi', 'Telugu'],
-        expertise: ['Night Trekking', 'Bird Watching', 'Cave Exploration', 'Photography'],
-        experience: 12,
-        rating: 4.9,
-        reviewsCount: 156,
-        pricePerHour: 500,
-        pricePerDay: 3000,
-        pricePerGroup: 5000,
-        isVerified: true,
-        email: 'arjun.swamy@yelaguide.com',
-        phone: '+91 94432 12345',
-        badges: ['Top Rated', 'Local Expert', 'Eco-Warrior'],
-        gallery: [
-            'https://images.unsplash.com/photo-1551632811-561732d1e306?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1527631746610-bca00a040d60?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80'
-        ]
-    },
-    {
-        id: '2',
-        name: 'Sravya Reddy',
-        bio: 'Environmentalist and expert guide for hidden trails and nature photography. Passionate about preserving the local ecosystem while providing an immersive mountain experience.',
-        image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-        certifications: ['Environmental Conservation Certificate', 'Nature Photography Award 2023'],
-        languages: ['English', 'Telugu', 'Tamil', 'Kannada'],
-        expertise: ['Nature Photography', 'Eco Trails', 'Plant Identification'],
-        experience: 6,
-        rating: 4.8,
-        reviewsCount: 89,
-        pricePerHour: 400,
-        pricePerDay: 2500,
-        pricePerGroup: 4000,
-        isVerified: true,
-        email: 'sravya.reddy@yelaguide.com',
-        phone: '+91 98845 67890',
-        badges: ['Eco-Friendly', 'Rising Star'],
-        gallery: [
-            'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80',
-            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b??auto=format&fit=crop&w=800&q=80'
-        ]
-    },
-    {
-        id: '3',
-        name: 'Karthik Raja',
-        bio: 'Born and raised in Yelagiri, I know every shortcut and waterfall in the region. Specialist in rock climbing and adventure camping.',
-        image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-        certifications: ['Certified Rock Climbing Instructor', 'NSS Volunteer'],
-        languages: ['Tamil', 'English'],
-        expertise: ['Rock Climbing', 'Adventure Camping', 'Survival Skills'],
-        experience: 8,
-        rating: 4.7,
-        reviewsCount: 120,
-        pricePerHour: 600,
-        pricePerDay: 3500,
-        pricePerGroup: 6000,
-        isVerified: false,
-        email: 'karthik.raja@yelaguide.com',
-        phone: '+91 81223 34455',
-        badges: ['Adventure Specialist'],
-        gallery: [
-            'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80'
-        ]
-    }
-];
+
 
 export default function TrekkingGuides() {
     const router = useRouter();
+    const { user } = useAuth();
     const [guides, setGuides] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedGuide, setSelectedGuide] = useState(null);
@@ -123,6 +53,7 @@ export default function TrekkingGuides() {
     const [selectedLanguages, setSelectedLanguages] = useState([]);
     const [selectedExpertise, setSelectedExpertise] = useState([]);
     const [minRating, setMinRating] = useState(0);
+    const [selectedLocations, setSelectedLocations] = useState([]);
 
     // Booking Details States
     const [bookingDate, setBookingDate] = useState('');
@@ -131,22 +62,23 @@ export default function TrekkingGuides() {
 
     const languages = ['Tamil', 'English', 'Hindi', 'Telugu', 'Kannada'];
     const expertiseOptions = ['Night Trekking', 'Bird Watching', 'Cave Exploration', 'Eco Trails', 'Photography', 'Rock Climbing'];
+    const locationOptions = [
+        { name: 'Swamimalai', icon: '🏔️' },
+        { name: 'Nilavur', icon: '🏡' },
+        { name: 'Mangalam', icon: '🌲' },
+        { name: 'Athanavur', icon: '🏪' }
+    ];
 
     useEffect(() => {
         async function fetchGuides() {
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/guides`);
                 const data = await res.json();
-                if (data.success && data.guides && data.guides.length > 0) {
+                if (data.success && data.guides) {
                     setGuides(data.guides);
-                } else {
-                    // Fallback to dummy data if API fails or is empty
-                    console.log('Using dummy guides as fallback');
-                    setGuides(dummyGuides);
                 }
             } catch (error) {
                 console.error('Failed to fetch guides:', error);
-                setGuides(dummyGuides);
             } finally {
                 setLoading(false);
             }
@@ -163,16 +95,25 @@ export default function TrekkingGuides() {
         const matchesExpertise = selectedExpertise.length === 0 || 
                                 selectedExpertise.some(exp => guide.expertise.includes(exp));
         const matchesRating = guide.rating >= minRating;
+        const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(guide.locationName);
 
-        return matchesSearch && matchesPrice && matchesLang && matchesExpertise && matchesRating;
+        return matchesSearch && matchesPrice && matchesLang && matchesExpertise && matchesRating && matchesLocation;
     });
 
     const handleBookNow = (guide) => {
+        if (!user) {
+            router.push(`/signin?redirect=/trekking-guides`);
+            return;
+        }
         setSelectedGuide(guide);
         setBookingMode('booking');
     };
 
     const handleViewProfile = (guide) => {
+        if (!user) {
+            router.push(`/signin?redirect=/trekking-guides`);
+            return;
+        }
         setSelectedGuide(guide);
         setBookingMode('profile');
         setIsPlayingVideo(false);
@@ -322,6 +263,33 @@ export default function TrekkingGuides() {
                             </div>
                         </div>
 
+                        {/* Location */}
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-[#1F3D2B]">Trail Locations</h3>
+                            <div className="flex flex-wrap gap-2">
+                                {locationOptions.map(loc => (
+                                    <button 
+                                        key={loc.name}
+                                        onClick={() => {
+                                            if (selectedLocations.includes(loc.name)) {
+                                                setSelectedLocations(selectedLocations.filter(l => l !== loc.name));
+                                            } else {
+                                                setSelectedLocations([...selectedLocations, loc.name]);
+                                            }
+                                        }}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${
+                                            selectedLocations.includes(loc.name)
+                                            ? 'bg-[#BFA76A] text-white border-[#BFA76A]'
+                                            : 'bg-white text-gray-600 border-gray-100 hover:border-[#BFA76A]'
+                                        }`}
+                                    >
+                                        <span className="text-base">{loc.icon}</span>
+                                        {loc.name}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         {/* Languages */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-[#1F3D2B]">Languages Spoken</h3>
@@ -407,6 +375,7 @@ export default function TrekkingGuides() {
                                     setSelectedLanguages([]);
                                     setSelectedExpertise([]);
                                     setMinRating(0);
+                                    setSelectedLocations([]);
                                 }}
                                 className="w-full py-4 rounded-2xl border border-dashed border-gray-200 text-gray-400 text-xs font-bold uppercase tracking-widest hover:border-[#BFA76A] hover:text-[#BFA76A] transition-all flex items-center justify-center gap-2"
                             >
@@ -463,7 +432,11 @@ export default function TrekkingGuides() {
                                                                         <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500" />
                                                                         <span className="text-xs font-bold text-yellow-700">{guide.rating}</span>
                                                                     </div>
-                                                                    <div className="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-widest">
+                                                                    <div className="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-widest border-l border-gray-200 pl-3">
+                                                                        <MapIcon className="w-3.5 h-3.5 text-[#BFA76A]" />
+                                                                        {guide.locationName || 'Yelagiri Hills'}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 text-xs text-gray-400 font-bold uppercase tracking-widest border-l border-gray-200 pl-3">
                                                                         <Clock className="w-3.5 h-3.5 text-[#BFA76A]" />
                                                                         {guide.experience} Years Experience
                                                                     </div>
@@ -530,6 +503,7 @@ export default function TrekkingGuides() {
                                                     setSelectedLanguages([]);
                                                     setSelectedExpertise([]);
                                                     setMinRating(0);
+                                                    setSelectedLocations([]);
                                                 }}
                                                 className="mt-6 text-[#BFA76A] font-bold text-sm hover:underline"
                                             >
