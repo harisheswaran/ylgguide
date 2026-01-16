@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 export default function SignInPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get('redirect') || '/';
     const { login } = useAuth();
     const [formData, setFormData] = useState({
         email: '',
@@ -26,7 +28,7 @@ export default function SignInPage() {
         };
 
         login(userData);
-        router.push('/');
+        router.push(redirectUrl);
     };
 
     return (

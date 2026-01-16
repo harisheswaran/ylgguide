@@ -164,51 +164,79 @@ export default function MyBookingsPage() {
                         <div className="w-10 h-10 border-4 border-[#BFA76A] border-t-transparent rounded-full animate-spin"></div>
                     </div>
                 ) : (packageBookings.length === 0 && guideBookings.length === 0) ? (
-                    <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-                        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Package className="w-8 h-8 text-gray-300" />
+                    <div className="text-center py-20 bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden relative">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#BFA76A]/30 to-transparent"></div>
+                        <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Package className="w-10 h-10 text-gray-200" />
                         </div>
-                        <h3 className="text-xl font-semibold text-gray-700 mb-2">No Bookings Found</h3>
-                        <p className="text-gray-500 mb-6">You haven't booked any trips yet.</p>
-                        <Link href="/" className="inline-block bg-[#1F3D2B] text-white px-6 py-3 rounded-lg font-medium hover:bg-[#163320] transition-colors">
-                            Explore Packages
-                        </Link>
+                        <h3 className="text-2xl font-bold text-[#1F3D2B] mb-2 font-serif">Your Travel History is Empty</h3>
+                        <p className="text-gray-500 mb-8 max-w-sm mx-auto">Start your Yelagiri adventure today! Browse our curated packages and professional guides.</p>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <Link href="/trip-packages" className="bg-[#1F3D2B] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#163320] transition-all shadow-lg shadow-[#1F3D2B]/20 flex items-center gap-2">
+                                <Package className="w-5 h-5" /> Explore Packages
+                            </Link>
+                            <Link href="/trekking-guides" className="bg-[#BFA76A] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#a38d53] transition-all shadow-lg shadow-[#BFA76A]/20 flex items-center gap-2">
+                                <Mountain className="w-5 h-5" /> Hire a Guide
+                            </Link>
+                        </div>
                     </div>
                 ) : (
-                    <div className="space-y-12">
-                        {/* Trekking Guides Section */}
-                        {guideBookings.length > 0 && (
-                            <section>
-                                <h2 className="text-2xl font-bold text-[#1F3D2B] mb-6 flex items-center gap-3">
-                                    <div className="p-2 bg-green-100 rounded-lg text-green-800">
-                                        <Mountain className="w-6 h-6" />
-                                    </div>
-                                    Trekking Guide Bookings
-                                </h2>
-                                <div className="space-y-4">
-                                    {guideBookings.map((booking, index) => (
-                                        <BookingCard key={booking._id || index} booking={booking} isGuide={true} />
-                                    ))}
+                    <div className="space-y-16">
+                        {/* Section 1: Trip Packages */}
+                        <div id="packages-section">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center">
+                                    <Package className="w-6 h-6 text-[#BFA76A]" />
                                 </div>
-                            </section>
-                        )}
-
-                        {/* Package Bookings Section */}
-                        {packageBookings.length > 0 && (
-                            <section>
-                                <h2 className="text-2xl font-bold text-[#1F3D2B] mb-6 flex items-center gap-3">
-                                    <div className="p-2 bg-amber-100 rounded-lg text-amber-800">
-                                        <Package className="w-6 h-6" />
-                                    </div>
-                                    Standard Package Bookings
-                                </h2>
-                                <div className="space-y-4">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-[#1F3D2B] font-serif">Trip Packages</h2>
+                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{packageBookings.length} Active Bookings</p>
+                                </div>
+                            </div>
+                            
+                            {packageBookings.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-6">
                                     {packageBookings.map((booking, index) => (
                                         <BookingCard key={booking._id || index} booking={booking} isGuide={false} />
                                     ))}
                                 </div>
-                            </section>
-                        )}
+                            ) : (
+                                <div className="bg-white/50 backdrop-blur rounded-[2rem] p-10 border border-dashed border-gray-200 text-center">
+                                    <p className="text-gray-400 font-medium mb-4">No package bookings found in your account.</p>
+                                    <Link href="/trip-packages" className="text-[#1F3D2B] font-bold text-sm flex items-center gap-2 justify-center hover:underline">
+                                        View Available Packages <ArrowRight className="w-4 h-4" />
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Section 2: Trekking Guides */}
+                        <div id="guides-section">
+                            <div className="flex items-center gap-4 mb-8">
+                                <div className="w-12 h-12 rounded-2xl bg-green-50 flex items-center justify-center">
+                                    <Mountain className="w-6 h-6 text-[#1F3D2B]" />
+                                </div>
+                                <div>
+                                    <h2 className="text-2xl font-bold text-[#1F3D2B] font-serif">Trekking Guides</h2>
+                                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{guideBookings.length} Reserved Sessions</p>
+                                </div>
+                            </div>
+                            
+                            {guideBookings.length > 0 ? (
+                                <div className="grid grid-cols-1 gap-6">
+                                    {guideBookings.map((booking, index) => (
+                                        <BookingCard key={booking._id || index} booking={booking} isGuide={true} />
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="bg-white/50 backdrop-blur rounded-[2rem] p-10 border border-dashed border-gray-200 text-center">
+                                    <p className="text-gray-400 font-medium mb-4">You haven&apos;t booked a trekking guide yet.</p>
+                                    <Link href="/trekking-guides" className="text-[#1F3D2B] font-bold text-sm flex items-center gap-2 justify-center hover:underline">
+                                        Meet our Local Guides <ArrowRight className="w-4 h-4" />
+                                    </Link>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

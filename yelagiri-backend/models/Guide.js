@@ -16,6 +16,10 @@ const guideSchema = new mongoose.Schema({
     videoUrl: {
         type: String
     },
+    locationName: {
+        type: String,
+        default: 'Yelagiri'
+    },
     certifications: [{
         type: String
     }],

@@ -284,7 +284,7 @@ export default function ProfilePage() {
     const categoryOptions = ['Tourist Spots', 'Hotels', 'Restaurants', 'Activities', 'Shopping'];
 
     return (
-        <div className="min-h-screen flex flex-col bg-gradient-to-b from-orange-50/40 via-teal-50/20 to-blue-50/40">
+        <div className="min-h-screen flex flex-col bg-[#FAFBF9]">
             <Navbar />
 
             {/* Notification */}
@@ -295,8 +295,8 @@ export default function ProfilePage() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -50 }}
                         className={`fixed top-24 right-4 z-50 ${typeof showNotification === 'object' && showNotification.error
-                                ? 'bg-gradient-to-r from-red-500 to-rose-500'
-                                : 'bg-gradient-to-r from-green-500 to-emerald-500'
+                                ? 'bg-[#C24444]'
+                                : 'bg-[#1F3D2B]'
                             } text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3`}
                     >
                         <span className="text-2xl">
@@ -318,7 +318,7 @@ export default function ProfilePage() {
                         className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50 mb-8"
                     >
                         {/* Cover Background */}
-                        <div className="relative h-48 bg-gradient-to-r from-go-green-400 via-blue-500 to-orange-400 overflow-hidden">
+                        <div className="relative h-48 bg-[#1F3D2B] overflow-hidden">
                             <motion.div
                                 animate={{
                                     backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
@@ -339,7 +339,7 @@ export default function ProfilePage() {
                                     whileHover={{ scale: 1.05 }}
                                     className="relative"
                                 >
-                                    <div className="p-2 bg-gradient-to-r from-go-green-400 to-blue-500 rounded-full">
+                                    <div className="p-2 bg-[#BFA76A] rounded-full">
                                         <Image
                                             src={user.avatar}
                                             alt={user.name}
@@ -355,10 +355,10 @@ export default function ProfilePage() {
                                     <h1 className="text-4xl font-bold text-slate-800 mb-2">{user.name}</h1>
                                     <p className="text-slate-600 mb-3">{user.email}</p>
                                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                                        <span className="px-4 py-1.5 bg-gradient-to-r from-go-green-100 to-blue-100 text-go-green-700 rounded-full text-sm font-semibold">
+                                        <span className="px-4 py-1.5 bg-[#1F3D2B]/5 text-[#1F3D2B] rounded-full text-sm font-bold uppercase tracking-wider">
                                             🌟 Explorer
                                         </span>
-                                        <span className="px-4 py-1.5 bg-gradient-to-r from-orange-100 to-amber-100 text-orange-700 rounded-full text-sm font-semibold">
+                                        <span className="px-4 py-1.5 bg-[#BFA76A]/10 text-[#BFA76A] rounded-full text-sm font-bold uppercase tracking-wider">
                                             ✈️ Travel Enthusiast
                                         </span>
                                         {editForm.emailVerified ? (
@@ -381,7 +381,7 @@ export default function ProfilePage() {
                                             ) : (
                                                 <button
                                                     onClick={() => setShowMobileVerification(true)}
-                                                    className="px-4 py-1.5 bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-700 rounded-full text-sm font-semibold hover:shadow-md transition-all"
+                                                    className="px-4 py-1.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-amber-100 transition-all"
                                                 >
                                                     📱 Verify Mobile
                                                 </button>
@@ -395,7 +395,7 @@ export default function ProfilePage() {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setShowEditProfile(true)}
-                                        className="px-6 py-3 bg-gradient-to-r from-go-green-500 to-blue-500 text-white font-bold rounded-full shadow-lg hover:shadow-xl transition-all"
+                                        className="px-8 py-3 bg-[#1F3D2B] text-white font-bold rounded-full shadow-lg hover:bg-[#163320] transition-all uppercase tracking-wider text-sm"
                                     >
                                         ✏️ Edit Profile
                                     </motion.button>
@@ -405,10 +405,10 @@ export default function ProfilePage() {
                             {/* Travel Stats */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
                                 {[
-                                    { label: 'Places Visited', value: travelStats.placesVisited, icon: '📍', color: 'from-go-green-500 to-blue-500' },
-                                    { label: 'Reviews', value: travelStats.reviewsWritten, icon: '⭐', color: 'from-purple-500 to-pink-500' },
-                                    { label: 'Bookings', value: travelStats.bookingsMade, icon: '🎫', color: 'from-orange-500 to-amber-500' },
-                                    { label: 'Favorites', value: travelStats.favoriteSpots, icon: '❤️', color: 'from-red-500 to-rose-500' }
+                                    { label: 'Places Visited', value: travelStats.placesVisited, icon: '📍', color: 'text-[#1F3D2B]', bg: 'bg-green-50' },
+                                    { label: 'Reviews', value: travelStats.reviewsWritten, icon: '⭐', color: 'text-[#BFA76A]', bg: 'bg-amber-50' },
+                                    { label: 'Bookings', value: travelStats.bookingsMade, icon: '🎫', color: 'text-[#1F3D2B]', bg: 'bg-green-50' },
+                                    { label: 'Favorites', value: travelStats.favoriteSpots, icon: '❤️', color: 'text-[#BFA76A]', bg: 'bg-amber-50' }
                                 ].map((stat, i) => (
                                     <motion.div
                                         key={stat.label}
@@ -416,14 +416,13 @@ export default function ProfilePage() {
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ delay: i * 0.1 }}
                                         whileHover={{ scale: 1.05, y: -5 }}
-                                        className="relative p-6 bg-gradient-to-br from-white to-slate-50 rounded-2xl shadow-lg border border-slate-100 overflow-hidden group"
+                                        className={`relative p-6 ${stat.bg} rounded-2xl shadow-sm border border-slate-100 overflow-hidden group`}
                                     >
-                                        <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-10 transition-opacity`}></div>
-                                        <div className="text-3xl mb-2">{stat.icon}</div>
-                                        <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                                        <div className="text-2xl mb-2">{stat.icon}</div>
+                                        <div className={`text-3xl font-bold ${stat.color} mb-1`}>
                                             {stat.value}
                                         </div>
-                                        <div className="text-sm text-slate-600 font-medium">{stat.label}</div>
+                                        <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">{stat.label}</div>
                                     </motion.div>
                                 ))}
                             </div>
@@ -443,9 +442,9 @@ export default function ProfilePage() {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setActiveTab(tab.id)}
-                                className={`px-6 py-3 rounded-full font-bold whitespace-nowrap transition-all ${activeTab === tab.id
-                                    ? 'bg-gradient-to-r from-go-green-500 to-blue-500 text-white shadow-lg'
-                                    : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'
+                                className={`px-6 py-2.5 rounded-full font-bold whitespace-nowrap transition-all uppercase tracking-wider text-xs ${activeTab === tab.id
+                                    ? 'bg-[#1F3D2B] text-white shadow-lg'
+                                    : 'bg-white text-slate-500 hover:bg-slate-50 border border-slate-200'
                                     }`}
                             >
                                 <span className="mr-2">{tab.icon}</span>
@@ -523,10 +522,10 @@ export default function ProfilePage() {
                                     </h2>
                                     <div className="space-y-3">
                                         {[
-                                            { label: 'My Bookings', icon: '🎫', href: '/my-bookings', color: 'from-go-green-500 to-blue-500' },
-                                            { label: 'Favorites', icon: '❤️', href: '/favorites', color: 'from-red-500 to-rose-500' },
-                                            { label: 'Trip Planner', icon: '🗺️', href: '/trip-planner', color: 'from-purple-500 to-pink-500' },
-                                            { label: 'Budget Tracker', icon: '💰', href: '/budget-tracker', color: 'from-orange-500 to-amber-500' }
+                                            { label: 'My Bookings', icon: '🎫', href: '/my-bookings', color: 'bg-[#1F3D2B]' },
+                                            { label: 'Favorites', icon: '❤️', href: '/favorites', color: 'bg-[#BFA76A]' },
+                                            { label: 'Trip Planner', icon: '🗺️', href: '/trip-planner', color: 'bg-[#1F3D2B]' },
+                                            { label: 'Budget Tracker', icon: '💰', href: '/budget-tracker', color: 'bg-[#BFA76A]' }
                                         ].map((action, i) => (
                                             <motion.button
                                                 key={action.label}
@@ -535,10 +534,10 @@ export default function ProfilePage() {
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.1 }}
                                                 whileHover={{ scale: 1.02, x: 5 }}
-                                                className={`w-full flex items-center gap-4 p-4 bg-gradient-to-r ${action.color} rounded-2xl text-white shadow-lg hover:shadow-xl transition-all group`}
+                                                className={`w-full flex items-center gap-4 p-4 ${action.color} rounded-2xl text-white shadow-md hover:shadow-lg transition-all group`}
                                             >
-                                                <span className="text-3xl">{action.icon}</span>
-                                                <span className="font-bold text-lg">{action.label}</span>
+                                                <span className="text-2xl">{action.icon}</span>
+                                                <span className="font-bold text-base uppercase tracking-wider">{action.label}</span>
                                                 <span className="ml-auto transform group-hover:translate-x-1 transition-transform">→</span>
                                             </motion.button>
                                         ))}
@@ -595,7 +594,7 @@ export default function ProfilePage() {
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={() => setShowAddBucketItem(true)}
-                                        className="px-4 py-2 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-full text-sm font-bold shadow-lg"
+                                        className="px-6 py-2.5 bg-[#BFA76A] text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-lg"
                                     >
                                         + Add Item
                                     </motion.button>
@@ -620,7 +619,7 @@ export default function ProfilePage() {
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleMarkDone(item.id)}
-                                                    className="px-4 py-2 bg-white rounded-full text-sm font-semibold text-orange-600 hover:bg-orange-100 transition-colors"
+                                                    className="px-4 py-2 bg-white rounded-full text-xs font-bold uppercase tracking-wider text-amber-600 hover:bg-amber-100 transition-colors border border-amber-100"
                                                 >
                                                     ✓ Mark Done
                                                 </button>
@@ -822,7 +821,7 @@ export default function ProfilePage() {
                             <div className="flex gap-3 mt-6">
                                 <button
                                     onClick={handleEditProfile}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-go-green-500 to-blue-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                                    className="flex-1 px-6 py-3 bg-[#1F3D2B] text-white font-bold rounded-xl hover:bg-[#163320] transition-all uppercase tracking-wider text-sm"
                                 >
                                     Save Changes
                                 </button>
@@ -898,7 +897,7 @@ export default function ProfilePage() {
                             <div className="flex gap-3 mt-6">
                                 <button
                                     onClick={handleAddPlace}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-go-green-500 to-blue-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                                    className="flex-1 px-6 py-3 bg-[#1F3D2B] text-white font-bold rounded-xl hover:bg-[#163320] transition-all uppercase tracking-wider text-sm"
                                 >
                                     Add Place
                                 </button>
@@ -976,7 +975,7 @@ export default function ProfilePage() {
                             <div className="flex gap-3 mt-6">
                                 <button
                                     onClick={handleAddBucketItem}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                                    className="flex-1 px-6 py-3 bg-[#BFA76A] text-white font-bold rounded-xl hover:bg-[#a38d53] transition-all uppercase tracking-wider text-sm"
                                 >
                                     Add Item
                                 </button>
@@ -1077,7 +1076,7 @@ export default function ProfilePage() {
 
                                 <button
                                     onClick={handleSendOtp}
-                                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                                    className="w-full px-6 py-3 bg-[#BFA76A] text-white font-bold rounded-xl hover:bg-[#a38d53] transition-all uppercase tracking-wider text-sm"
                                 >
                                     Send OTP
                                 </button>
@@ -1099,7 +1098,7 @@ export default function ProfilePage() {
                                 <button
                                     onClick={handleVerifyOtp}
                                     disabled={otp.length !== 6}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-go-green-500 to-blue-500 text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="flex-1 px-6 py-3 bg-[#1F3D2B] text-white font-bold rounded-xl hover:bg-[#163320] transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider text-sm"
                                 >
                                     Verify OTP
                                 </button>

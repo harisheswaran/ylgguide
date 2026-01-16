@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 
 export default function SignUpPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get('redirect') || '/';
     const { signup, login } = useAuth();
     const [formData, setFormData] = useState({
         name: '',
@@ -35,9 +37,10 @@ export default function SignUpPage() {
         // Save user data
         signup(userData);
 
-        // Redirect to home page
-        router.push('/');
+        // Redirect to original destination or home
+        router.push(redirectUrl);
     };
+
 
     return (
         <div className="min-h-screen flex items-center justify-center relative overflow-hidden py-8">

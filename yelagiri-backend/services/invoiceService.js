@@ -4,6 +4,7 @@ const { generateInvoicePDF } = require('../utils/invoiceGenerator');
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
 // In-memory store for mock invoices
 global.mockInvoices = global.mockInvoices || {};
@@ -28,10 +29,10 @@ async function createInvoice(booking) {
             const existingInvoice = await Invoice.findOne({ booking: booking._id });
             if (existingInvoice) {
                 console.log('Invoice already exists for booking:', booking._id);
-                // If it exists but PDF is missing, trigger regen
+                // If it exists but PDF is missing, trigger regen and AWAIT it for preview consistency
                 if (!existingInvoice.pdfPath || !fs.existsSync(existingInvoice.pdfPath)) {
-                     console.log('Invoice PDF missing, regenerating...');
-                     generateInvoicePDFAsync(existingInvoice);
+                     console.log('Invoice PDF missing, regenerating and awaiting...');
+                     await generateInvoicePDFAsync(existingInvoice);
                 }
                 return existingInvoice;
             }
@@ -83,7 +84,7 @@ async function createInvoice(booking) {
             await generateInvoicePDFAsync(invoice);
         } else {
             await invoice.save();
-            generateInvoicePDFAsync(invoice);
+            await generateInvoicePDFAsync(invoice);
         }
 
         return invoice;
@@ -224,14 +225,23 @@ async function getInvoiceById(invoiceId) {
         if (global.mockInvoices && global.mockInvoices[invoiceId]) {
             console.log(`🧠 Found invoice ${invoiceId} in mock store`);
             // Return object with necessary structure
+            const mockData = global.mockInvoices[invoiceId];
             return {
-                ...global.mockInvoices[invoiceId],
-                toObject: () => global.mockInvoices[invoiceId]
+                ...mockData,
+                toObject: () => mockData
             };
         }
 
-        const invoice = await Invoice.findById(invoiceId).populate('booking');
-        return invoice;
+        // Try searching by Mongo ID if valid
+        if (mongoose.Types.ObjectId.isValid(invoiceId)) {
+            const invoice = await Invoice.findById(invoiceId).populate('booking');
+            if (invoice) return invoice;
+        }
+
+        // Fallback: Try searching by Invoice Number
+        console.log(`🔍 Searching by Invoice Number: ${invoiceId}`);
+        const invoiceByNum = await Invoice.findOne({ invoiceNumber: invoiceId }).populate('booking');
+        return invoiceByNum;
     } catch (error) {
         console.error('Error fetching invoice:', error);
         throw new Error('Failed to fetch invoice: ' + error.message);
