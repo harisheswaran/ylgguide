@@ -5,7 +5,7 @@ const Package = require('../models/Package');
 // @access  Public
 const getPackages = async (req, res) => {
     try {
-        const { type, duration, minPrice, maxPrice, rating, stars, amenities, sort } = req.query;
+        const { type, duration, rating, stars, amenities, sort } = req.query;
         let query = {};
 
         if (type && type !== 'All') {
@@ -39,10 +39,10 @@ const getPackages = async (req, res) => {
         if (sort === 'Highest Rated') sortOptions.rating = -1;
 
         const packages = await Package.find(query).sort(sortOptions);
-        
+
         // Manual price sorting helper if stored as string
         // (In a real app, price would be a number)
-        
+
         res.json({
             success: true,
             count: packages.length,

@@ -10,12 +10,12 @@ const crypto = require('crypto');
  */
 async function createMockPaymentOrder(orderData) {
     const { amount, currency = 'INR', receipt, notes = {} } = orderData;
-    
+
     // Generate a fake order ID
     const orderId = `order_mock_${crypto.randomBytes(10).toString('hex')}`;
-    
+
     console.log('🎭 MOCK PAYMENT: Creating order', { orderId, amount, currency });
-    
+
     return {
         id: orderId,
         entity: 'order',
@@ -34,7 +34,7 @@ async function createMockPaymentOrder(orderData) {
 /**
  * Verify mock payment signature (always returns true for testing)
  */
-function verifyMockPaymentSignature(orderId, paymentId, signature) {
+function verifyMockPaymentSignature(orderId, paymentId, _signature) {
     console.log('🎭 MOCK PAYMENT: Verifying signature', { orderId, paymentId });
     // In mock mode, always return true
     return true;
@@ -45,7 +45,7 @@ function verifyMockPaymentSignature(orderId, paymentId, signature) {
  */
 async function getMockPaymentDetails(paymentId) {
     console.log('🎭 MOCK PAYMENT: Fetching payment details', { paymentId });
-    
+
     return {
         id: paymentId,
         entity: 'payment',
@@ -76,15 +76,15 @@ function isMockMode() {
 
     if (gateway === 'PHONEPE') {
         // PhonePe requires Merchant ID and Salt Key
-        const hasPhonePeKeys = process.env.PHONEPE_MERCHANT_ID && 
-                              process.env.PHONEPE_SALT_KEY && 
-                              !process.env.PHONEPE_MERCHANT_ID.includes('xxxx');
+        const hasPhonePeKeys = process.env.PHONEPE_MERCHANT_ID &&
+            process.env.PHONEPE_SALT_KEY &&
+            !process.env.PHONEPE_MERCHANT_ID.includes('xxxx');
         return !hasPhonePeKeys;
     } else {
         // Razorpay requires Key ID and Key Secret
-        const hasRazorpayKeys = process.env.RAZORPAY_KEY_ID && 
-                               process.env.RAZORPAY_KEY_SECRET && 
-                               !process.env.RAZORPAY_KEY_ID.includes('xxxx');
+        const hasRazorpayKeys = process.env.RAZORPAY_KEY_ID &&
+            process.env.RAZORPAY_KEY_SECRET &&
+            !process.env.RAZORPAY_KEY_ID.includes('xxxx');
         return !hasRazorpayKeys;
     }
 }

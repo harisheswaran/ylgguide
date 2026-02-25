@@ -1,5 +1,4 @@
 const PaymentProvider = require('./PaymentProvider');
-const crypto = require('crypto');
 
 class MockProvider extends PaymentProvider {
     constructor() {
@@ -10,8 +9,8 @@ class MockProvider extends PaymentProvider {
      * Create a mock payment order
      */
     async createOrder(data) {
-        const { amount, receipt } = data;
-        
+        const { amount } = data;
+
         // Simulate a slight delay
         await new Promise(resolve => setTimeout(resolve, 500));
 
@@ -37,7 +36,7 @@ class MockProvider extends PaymentProvider {
     /**
      * Handle mock webhook (usually not needed for local mock)
      */
-    async handleWebhook(payload, signature) {
+    async handleWebhook(payload, _signature) {
         return {
             event: 'payment.captured',
             orderId: payload.order_id,

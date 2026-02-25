@@ -5,7 +5,7 @@ const {
     getPayment,
     getAllPayments
 } = require('../controllers/paymentController');
-const { validateMongoId, validatePagination } = require('../middleware/validationMiddleware');
+const { validatePagination } = require('../middleware/validationMiddleware');
 const { webhookLimiter } = require('../middleware/rateLimiter');
 
 // Webhook route (no auth, verified via signature)

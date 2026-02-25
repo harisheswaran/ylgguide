@@ -2,6 +2,8 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
+const { Logger } = require('./config/logger');
+const requestLogger = require('./middleware/requestLogger');
 
 // Load env vars
 dotenv.config({ override: true });
@@ -10,6 +12,7 @@ dotenv.config({ override: true });
 connectDB();
 
 const app = express();
+const logger = Logger('Server');
 
 // Middleware
 app.use(cors({
@@ -18,10 +21,7 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'user-email']
 }));
-app.use((req, res, next) => {
-    console.log(`📡 [${new Date().toISOString()}] ${req.method} ${req.url}`);
-    next();
-});
+app.use(requestLogger); // Log requests
 app.use(express.json({ limit: '50mb' })); // Increased for base64 images
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
@@ -44,13 +44,47 @@ app.get('/', (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
+app.use((err, req, res, _next) => {
+    logger.error(err.stack); // Use logger
     res.status(500).json({ message: 'Something went wrong!' });
 });
+
+const listEndpoints = require('express-list-endpoints');
 
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    logger.info(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+
+    // Log all registered routes
+    try {
+        const routeMaps = [
+            { prefix: '/api/categories', router: require('./routes/categoryRoutes') },
+            { prefix: '/api/listings', router: require('./routes/listingRoutes') },
+            { prefix: '/api/bookings', router: require('./routes/bookingRoutes') },
+            { prefix: '/api/orders', router: require('./routes/orderRoutes') },
+            { prefix: '/api/users', router: require('./routes/userRoutes') },
+            { prefix: '/api/auth', router: require('./routes/authRoutes') }
+        ];
+
+        logger.info('Registered Routes:');
+
+        // Log root health check
+        logger.info('GET /');
+
+        routeMaps.forEach(({ prefix, router }) => {
+            const endpoints = listEndpoints(router);
+            endpoints.forEach(route => {
+                route.methods.forEach(method => {
+                    // Ensure path logic handles root slashes correctly if needed, usually listEndpoints returns '/' or '/:id'
+                    const fullPath = route.path === '/' ? prefix : `${prefix}${route.path}`;
+                    logger.info(`${method} ${fullPath}`);
+                });
+            });
+        });
+
+    } catch (err) {
+        logger.error('Failed to list routes: ' + err.message);
+    }
 });
+

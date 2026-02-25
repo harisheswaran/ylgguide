@@ -41,7 +41,7 @@ const webhookLimiter = rateLimit({
     },
     standardHeaders: true,
     legacyHeaders: false,
-    skip: (req) => {
+    skip: (_req) => {
         // Skip rate limiting if webhook signature is valid
         // This will be checked in the controller
         return false;

@@ -7,17 +7,13 @@ global.File = class File extends Blob {
     }
 };
 
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
-const axios = require('axios');
-const cheerio = require('cheerio');
 const Listing = require('./models/Listing');
 const Category = require('./models/Category');
 const connectDB = require('./config/db');
 
 dotenv.config();
 
-const BOOKING_URL = 'https://www.booking.com/searchresults.en-gb.html?label=yelagiri-yYLb786nAnnBNxzrExEZugS392936638068%3Apl%3Ata%3Ap1%3Ap2%3Aac%3Aap%3Aneg%3Afi%3Atikwd-299594647645%3Alp1007810%3Ali%3Adec%3Adm%3Appccp%3DUmFuZG9tSVYkc2RlIyh9YZVcNNsENnH02-pWD53qm9c&gclid=Cj0KCQiAosrJBhD0ARIsAHebCNrV_VpBjmXC8ANZpWJFWeHaSZodTuIZi1q1ZDQ12k7nRnSVUQcvXysaAtm7EALw_wcB&aid=306395&city=900052697';
 
 const seedData = async () => {
     try {

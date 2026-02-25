@@ -1,7 +1,5 @@
-const User = require('../models/User');
 
 const protect = async (req, res, next) => {
-    let token;
 
     // Check for custom header used by our frontend
     if (req.headers['user-email']) {

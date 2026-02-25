@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+
 const cheerio = require('cheerio');
 const fs = require('fs');
 const path = require('path');

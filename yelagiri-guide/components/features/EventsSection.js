@@ -32,7 +32,7 @@ const events = [
         date: "Dec 31, 2024",
         time: "8:00 PM - 2:00 AM",
         location: "Vainu Bappu Observatory",
-        image: "https://images.unsplash.com/photo-1467341303251-067e69c06509?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=800&q=80",
         description: "A magical night under the crystal clear skies of the hills with expert guides."
     }
 ];
@@ -60,7 +60,7 @@ export default function EventsSection() {
                         <h2 className="text-2xl md:text-4xl font-bold text-[#1F3D2B] leading-tight" style={{ fontFamily: 'var(--font-poppins)' }}>Upcoming Events</h2>
                         <p className="text-sm md:text-base font-light mt-4 max-w-lg text-[#5F6368]">Curated seasonal festivals and exclusive experiences in the hills.</p>
                     </motion.div>
-                    
+
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -129,9 +129,9 @@ export default function EventsSection() {
                                 <p className="text-[#5F6368] text-[14px] leading-relaxed font-light line-clamp-3 mb-8 overflow-hidden">
                                     {event.description}
                                 </p>
- 
+
                                 <div className="mt-auto flex justify-end">
-                                    <motion.button 
+                                    <motion.button
                                         whileHover={{ x: 5 }}
                                         className="text-[#1F3D2B] font-bold flex items-center gap-2 group/link text-sm"
                                     >

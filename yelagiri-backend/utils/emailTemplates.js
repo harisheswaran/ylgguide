@@ -37,9 +37,7 @@ function getPackageConfirmationEmail(data) {
     const {
         guestName, bookingId, packageName, checkInDate, checkOutDate, guests, totalAmount, invoiceNumber,
         companyName = process.env.COMPANY_NAME || 'Go Yelagiri',
-        companyEmail = process.env.COMPANY_EMAIL || 'info@goyelagiri.com',
         companyPhone = process.env.COMPANY_PHONE || '+91 98765 43210',
-        companyWebsite = process.env.COMPANY_WEBSITE || 'https://goyelagiri.com',
         invoiceUrl
     } = data;
 
@@ -229,7 +227,7 @@ function getGuideConfirmationEmail(data) {
 }
 
 function getGuideConfirmationText(data) {
-    const { guestName, bookingId, packageName, totalAmount, baseAmount, gstAmount, invoiceNumber, bookingDate, bookingSlot, bookingPeople, guideEmail, guidePhone, companyName, companyPhone, invoiceUrl } = data;
+    const { guestName, bookingId, packageName, totalAmount, baseAmount, gstAmount, invoiceNumber, bookingDate, bookingSlot, bookingPeople, guideEmail, guidePhone, companyPhone, invoiceUrl } = data;
     return `TREK CONFIRMED!\n\nDear ${guestName},\n\nYour trek is booked!\n\nTREK DETAILS\n-------------\nBooking ID: ${bookingId}\nInvoice: ${invoiceNumber}\nExperience: ${packageName}\nTrek Date: ${new Date(bookingDate).toLocaleDateString()}\nTime Slot: ${bookingSlot}\nGroup Size: ${bookingPeople}\n\nBASE AMOUNT: ₹${baseAmount.toLocaleString('en-IN')}\nGST (18%): ₹${gstAmount.toLocaleString('en-IN')}\nTOTAL PAID: ₹${totalAmount.toLocaleString('en-IN')}\n\nINVOICE: ${invoiceUrl}\n\nGUIDE CONTACT\n${guideEmail || ''} ${guidePhone || ''}\n\nNeed Help? Call ${companyPhone || '+91 98765 43210'}`;
 }
 

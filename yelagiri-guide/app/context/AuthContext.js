@@ -29,7 +29,11 @@ export function AuthProvider({ children }) {
             // For now, let's keep local storage as a fallback or secondary check
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+                setUser({
+                    ...parsedUser,
+                    avatar: parsedUser.avatar || parsedUser.image
+                });
             } else {
                 setUser(null);
             }
@@ -40,8 +44,12 @@ export function AuthProvider({ children }) {
     const login = async (userData) => {
         // If userData is provided (legacy local login), use it
         if (userData) {
-            setUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
+            const userWithAvatar = {
+                ...userData,
+                avatar: userData.avatar || userData.image
+            };
+            setUser(userWithAvatar);
+            localStorage.setItem('user', JSON.stringify(userWithAvatar));
         } else {
             // Otherwise trigger NextAuth Google login
             await signIn('google');
@@ -55,12 +63,25 @@ export function AuthProvider({ children }) {
     };
 
     const signup = (userData) => {
-        setUser(userData);
-        localStorage.setItem('user', JSON.stringify(userData));
+        const userWithAvatar = {
+            ...userData,
+            avatar: userData.avatar || userData.image
+        };
+        setUser(userWithAvatar);
+        localStorage.setItem('user', JSON.stringify(userWithAvatar));
+    };
+
+    const updateUser = (userData) => {
+        const userWithAvatar = {
+            ...userData,
+            avatar: userData.avatar || userData.image
+        };
+        setUser(prev => ({ ...prev, ...userWithAvatar }));
+        localStorage.setItem('user', JSON.stringify({ ...user, ...userWithAvatar }));
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, signup, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, signup, updateUser, loading }}>
             {children}
         </AuthContext.Provider>
     );

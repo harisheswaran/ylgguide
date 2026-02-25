@@ -18,7 +18,7 @@ exports.getProfile = async (req, res) => {
 
 exports.updateProfile = async (req, res) => {
     try {
-        const { name, email, image, bloodGroup, emergencyContact, mobile } = req.body;
+        const { name, email, image, bloodGroup, emergencyContact, emergencyContactName, mobile } = req.body;
 
         // Use email from body or header to find user
         const targetEmail = email || req.headers['user-email'];
@@ -33,6 +33,7 @@ exports.updateProfile = async (req, res) => {
         user.image = image || user.image;
         user.bloodGroup = bloodGroup || user.bloodGroup;
         user.emergencyContact = emergencyContact || user.emergencyContact;
+        user.emergencyContactName = emergencyContactName || user.emergencyContactName;
         user.mobile = mobile || user.mobile;
 
         await user.save();

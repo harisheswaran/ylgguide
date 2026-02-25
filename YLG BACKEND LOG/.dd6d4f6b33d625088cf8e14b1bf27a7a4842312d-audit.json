@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/home/harish/Antigravity/YLGGuide/ylgguide/YLG BACKEND LOG/.dd6d4f6b33d625088cf8e14b1bf27a7a4842312d-audit.json",
+    "files": [
+        {
+            "date": 1767687465317,
+            "name": "/home/harish/Antigravity/YLGGuide/ylgguide/YLG BACKEND LOG/rejections-2026-01-06.log",
+            "hash": "9fcfaff43bf61738eee1a1fd42fba99cf337bd43fa064e18d28156b789b91d6e"
+        }
+    ],
+    "hashType": "sha256"
+}

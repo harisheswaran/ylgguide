@@ -1,6 +1,5 @@
 const PackageBooking = require('../models/PackageBooking');
 const GuideBooking = require('../models/GuideBooking');
-const User = require('../models/User');
 const { createInvoice } = require('../services/invoiceService');
 const { sendBookingConfirmationEmail } = require('../services/emailService');
 const { createMockPaymentOrder, isMockMode } = require('../services/mockPaymentService');
@@ -12,7 +11,7 @@ global.mockBookings = global.mockBookings || {};
 const createBooking = async (req, res) => {
     try {
         console.log('📩 createBooking Request Received:', req.body);
-        
+
         // STRICT BRANCHING: Check if it's a guide booking (presence of bookingDate)
         if (req.body.bookingDate) {
             return await handleGuideBooking(req, res);
@@ -28,10 +27,10 @@ const createBooking = async (req, res) => {
 
 // --- Helper Handler: PACKAGE BOOKING ---
 const handlePackageBooking = async (req, res) => {
-    const { 
-        guestName, guestEmail, guestPhone, 
+    const {
+        guestName, guestEmail, guestPhone,
         packageName, packageDescription,
-        checkIn, checkOut, guests, rooms = 1, 
+        checkIn, checkOut, guests, rooms = 1,
         accommodationType, specialRequests,
         baseAmount
     } = req.body;
@@ -73,8 +72,8 @@ const handlePackageBooking = async (req, res) => {
 
 // --- Helper Handler: GUIDE BOOKING ---
 const handleGuideBooking = async (req, res) => {
-    const { 
-        guestName, guestEmail, guestPhone, 
+    const {
+        guestName, guestEmail, guestPhone,
         packageName, packageDescription,
         bookingDate, bookingSlot, bookingPeople,
         guideEmail, guidePhone,
@@ -123,12 +122,12 @@ const processPaymentForBooking = async (booking, res) => {
         console.log('🎭 MOCK MODE: Initiating mock payment order');
         const mockOrder = await createMockPaymentOrder({
             amount: booking.totalAmount,
-            receipt: `receipt_${Date.now()}` 
+            receipt: `receipt_${Date.now()}`
         });
 
         booking.gatewayOrderId = mockOrder.id;
         booking.provider = 'Mock';
-        
+
         if (!MOCK_DB_MODE && typeof booking.save === 'function') {
             await booking.save();
         }
@@ -149,13 +148,13 @@ const processPaymentForBooking = async (booking, res) => {
     // Fallback for missing Real Payment Key
     console.warn('⚠️ Real payment requested but not implemented. Falling back to Mock.');
     const fallbackOrder = await createMockPaymentOrder({
-            amount: booking.totalAmount,
-            receipt: `receipt_${Date.now()}`
+        amount: booking.totalAmount,
+        receipt: `receipt_${Date.now()}`
     });
 
     booking.gatewayOrderId = fallbackOrder.id;
     booking.provider = 'Mock';
-    
+
     if (!MOCK_DB_MODE && typeof booking.save === 'function') {
         await booking.save();
     }
@@ -188,10 +187,10 @@ const findBookingById = async (id) => {
 // @route   POST /api/bookings/verify-payment
 const verifyPayment = async (req, res) => {
     try {
-        const { order_id, bookingId } = req.body;
+        const { bookingId } = req.body;
 
         let booking;
-        
+
         if (MOCK_DB_MODE) {
             // Check memory store first
             if (global.mockBookings && global.mockBookings[bookingId]) {
@@ -199,9 +198,8 @@ const verifyPayment = async (req, res) => {
                 console.log('🧠 Retrieved mock booking from memory store');
             } else {
                 // Mock booking for testing (Fallback)
-                const isPkg = bookingId.toLowerCase().includes('pkg');
                 const isGuide = bookingId.toLowerCase().includes('guide');
-                
+
                 booking = {
                     _id: bookingId,
                     bookingId: `BK${Date.now()}`,
@@ -239,7 +237,7 @@ const verifyPayment = async (req, res) => {
         booking.bookingStatus = 'confirmed';
         booking.paymentCompletedAt = Date.now();
         booking.confirmedAt = Date.now();
-        
+
         // Skip database save in mock DB mode
         if (!MOCK_DB_MODE) {
             await booking.save();
@@ -255,7 +253,7 @@ const verifyPayment = async (req, res) => {
 
         // Send Email (Added for Mock/Manual Flow)
         if (invoice) {
-             try {
+            try {
                 console.log(`📧 Sending confirmation email for ${booking.bookingId || booking._id}...`);
                 await sendBookingConfirmationEmail(booking, invoice);
                 console.log(`   ✅ Email sent successfully.`);
@@ -311,7 +309,7 @@ const getUserBookings = async (req, res) => {
     try {
         const pkgBookings = await PackageBooking.find({ user: req.params.userId }).sort({ createdAt: -1 });
         const gdeBookings = await GuideBooking.find({ user: req.params.userId }).sort({ createdAt: -1 });
-        
+
         res.json({ success: true, data: [...pkgBookings, ...gdeBookings] });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -333,7 +331,7 @@ const getBookingForConfirmation = async (req, res) => {
             // Return smarter mock booking data for testing (Fallback)
             const isPkg = req.params.id.toLowerCase().includes('pkg');
             const isGuide = req.params.id.toLowerCase().includes('guide') && !isPkg;
-            
+
             const mockBooking = {
                 _id: req.params.id,
                 bookingId: `BK${Date.now()}`,
@@ -363,9 +361,9 @@ const getBookingForConfirmation = async (req, res) => {
             console.log('🎭 MOCK DB MODE: Returning dynamic mock booking for confirmation');
             return res.json({ success: true, data: mockBooking });
         }
-        
+
         const booking = await findBookingById(req.params.id);
-        
+
         if (!booking) {
             return res.status(404).json({ success: false, message: 'Booking not found' });
         }
@@ -380,9 +378,9 @@ const getBookingForConfirmation = async (req, res) => {
 const getEmailPreview = async (req, res) => {
     try {
         const { getBookingConfirmationEmail } = require('../utils/emailTemplates');
-        
+
         let booking;
-        
+
         if (MOCK_DB_MODE) {
             // Check memory store
             if (global.mockBookings && global.mockBookings[req.params.id]) {
@@ -392,7 +390,7 @@ const getEmailPreview = async (req, res) => {
                 // Mock booking for testing (Fallback)
                 const isPkg = req.params.id.toLowerCase().includes('pkg');
                 const isGuide = req.params.id.toLowerCase().includes('guide') && !isPkg;
-                
+
                 booking = {
                     _id: req.params.id,
                     bookingId: `BK${Date.now()}`,
@@ -452,7 +450,7 @@ const getEmailPreview = async (req, res) => {
         };
 
         let htmlContent = getBookingConfirmationEmail(emailData);
-        
+
         // Check for attachment to show in preview
         const hasAttachment = invoice.pdfPath && require('fs').existsSync(invoice.pdfPath);
 
@@ -476,9 +474,9 @@ const getEmailPreview = async (req, res) => {
                 </div>
             </div>
         `;
-        
+
         htmlContent = attachmentBar + htmlContent;
-        
+
         // Return HTML directly for preview
         res.setHeader('Content-Type', 'text/html');
         res.send(htmlContent);
@@ -493,12 +491,12 @@ const syncMockBooking = async (req, res) => {
         if (!booking || (!booking._id && !booking.bookingId)) {
             return res.status(400).json({ success: false, message: 'Invalid booking data' });
         }
-        
+
         const id = booking.bookingId || booking._id; // Prefer bookingId if available for key
-        
+
         // Ensure global store exists
         global.mockBookings = global.mockBookings || {};
-        
+
         // Save to memory
         global.mockBookings[id] = booking;
         // Also save by _id if different

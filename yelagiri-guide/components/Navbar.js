@@ -188,14 +188,21 @@ export default function Navbar({ dark = true }) {
                                         onClick={() => setIsProfileOpen(!isProfileOpen)}
                                         className="flex items-center gap-2"
                                     >
-                                        <div className="p-0.5 rounded-full bg-[#BFA76A]">
-                                            <Image
-                                                src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=4F46E5&color=fff`}
-                                                alt={user.name}
-                                                width={28}
-                                                height={28}
-                                                className="rounded-full border border-white"
-                                            />
+                                        <div className="p-0.5 rounded-full bg-[#1F3D2B]/10">
+                                            <div className="w-8 h-8 rounded-full overflow-hidden relative bg-[#1F3D2B] flex items-center justify-center border border-white shadow-sm">
+                                                {user.avatar ? (
+                                                    <Image
+                                                        src={user.avatar}
+                                                        alt={user.name}
+                                                        fill
+                                                        className="object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-xs font-bold text-white tracking-wider">
+                                                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </motion.button>
                                     <AnimatePresence>

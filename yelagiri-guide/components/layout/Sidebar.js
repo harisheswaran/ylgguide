@@ -83,7 +83,7 @@ export default function Sidebar() {
                                 {activeTab === 'ai' && (
                                     <div className="space-y-4">
                                         <div className="bg-zinc-800 p-4 rounded-xl">
-                                            <p className="text-gray-300 text-sm">Hello! I&apos;m your Go Elagiri AI guide. Ask me anything about hotels, spots, or food!</p>
+                                            <p className="text-gray-300 text-sm">Hello! I&apos;m your Go Yelagiri AI guide. Ask me anything about hotels, spots, or food!</p>
                                         </div>
                                         {/* Placeholder for Chat Interface */}
                                         <div className="mt-auto">

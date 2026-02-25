@@ -26,6 +26,9 @@ const userSchema = new mongoose.Schema({
     emergencyContact: {
         type: String
     },
+    emergencyContactName: {
+        type: String
+    },
     emailVerified: {
         type: Boolean,
         default: false
@@ -36,6 +39,11 @@ const userSchema = new mongoose.Schema({
     },
     verificationToken: String,
     mobileOtp: String,
+    emailOtp: String,
+    profileCompleted: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
         default: Date.now

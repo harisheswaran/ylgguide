@@ -60,7 +60,7 @@ export default function Footer() {
                         className="lg:col-span-1"
                     >
                         <div className="mb-6">
-                            <Image src="/logo.png" alt="Go Elagiri" width={200} height={70} className="h-14 w-auto" />
+                            <Image src="/logo.png" alt="Go Yelagiri" width={200} height={70} className="h-14 w-auto" />
                         </div>
                         <p className="text-slate-300 text-sm leading-relaxed mb-6">
                             Your guide to Yelagiri, your way! Discover, plan, and experience the magic of the hills! ✨
@@ -163,13 +163,13 @@ export default function Footer() {
                         {/* Newsletter */}
                         <div className="bg-gradient-to-br from-slate-800/50 to-slate-700/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-600/30">
                             <p className="text-xs text-slate-300 mb-3 font-medium">Subscribe to our newsletter 📬</p>
-                            <div className="flex gap-2">
+                            <div className="flex items-center gap-2">
                                 <input
                                     type="email"
                                     placeholder="Your email"
-                                    className="flex-1 px-3 py-2 bg-slate-900/50 border border-slate-600 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-mint-500 transition-colors"
+                                    className="flex-1 px-3 py-2.5 bg-slate-900/50 border border-slate-600 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-mint-500 transition-colors"
                                 />
-                                <button className="px-4 py-2 bg-gradient-to-r from-forest-600 to-go-green-500 rounded-lg text-sm font-bold hover:shadow-lg hover:shadow-forest-500/20 transition-all">
+                                <button className="px-4 py-2.5 bg-gradient-to-r from-forest-600 to-go-green-500 rounded-lg text-sm font-bold hover:shadow-lg hover:shadow-forest-500/20 transition-all flex items-center justify-center">
                                     →
                                 </button>
                             </div>
@@ -186,7 +186,7 @@ export default function Footer() {
                 >
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                         <p className="text-sm text-slate-400">
-                            © {currentYear} <span className="font-semibold bg-gradient-to-r from-forest-400 to-mint-400 bg-clip-text text-transparent">Go Elagiri</span>. All rights reserved.
+                            © {currentYear} <span className="font-semibold bg-gradient-to-r from-forest-400 to-mint-400 bg-clip-text text-transparent">Go Yelagiri</span>. All rights reserved.
                         </p>
                         <div className="flex gap-6 text-xs text-slate-400">
                             <Link href="/privacy" className="hover:text-mint-400 transition-colors">Privacy Policy</Link>

@@ -6,15 +6,15 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { 
-    Star, 
-    Clock, 
-    CheckCircle2, 
-    ShieldCheck, 
-    ChevronRight, 
-    User, 
-    Heart, 
-    Languages, 
+import {
+    Star,
+    Clock,
+    CheckCircle2,
+    ShieldCheck,
+    ChevronRight,
+    User,
+    Heart,
+    Languages,
     Trophy,
     CreditCard,
     Mail,
@@ -46,7 +46,7 @@ export default function TrekkingGuides() {
     const [bookingMode, setBookingMode] = useState(null); // 'profile' or 'booking'
     const [viewMode, setViewMode] = useState('grid'); // grid or map
     const [isPlayingVideo, setIsPlayingVideo] = useState(false);
-    
+
     // Filter States
     const [searchQuery, setSearchQuery] = useState('');
     const [priceRange, setPriceRange] = useState(5000);
@@ -87,13 +87,13 @@ export default function TrekkingGuides() {
     }, []);
 
     const filteredGuides = guides.filter(guide => {
-        const matchesSearch = guide.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                             guide.bio.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = guide.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            guide.bio.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesPrice = guide.pricePerHour <= priceRange;
-        const matchesLang = selectedLanguages.length === 0 || 
-                           selectedLanguages.some(lang => guide.languages.includes(lang));
-        const matchesExpertise = selectedExpertise.length === 0 || 
-                                selectedExpertise.some(exp => guide.expertise.includes(exp));
+        const matchesLang = selectedLanguages.length === 0 ||
+            selectedLanguages.some(lang => guide.languages.includes(lang));
+        const matchesExpertise = selectedExpertise.length === 0 ||
+            selectedExpertise.some(exp => guide.expertise.includes(exp));
         const matchesRating = guide.rating >= minRating;
         const matchesLocation = selectedLocations.length === 0 || selectedLocations.includes(guide.locationName);
 
@@ -134,7 +134,7 @@ export default function TrekkingGuides() {
             alert('Please select a time slot for your trek.');
             return;
         }
-        
+
         const price = calculatePrice();
         const params = new URLSearchParams({
             id: `guide-${selectedGuide.id}`,
@@ -152,17 +152,17 @@ export default function TrekkingGuides() {
 
     const calculatePrice = () => {
         if (!selectedGuide) return 0;
-        
+
         // Accurate pricing calculation
         // If they have a per group price, use that as base
         // If not, use per hour * 6 (average trek duration)
         const basePrice = selectedGuide.pricePerGroup || (selectedGuide.pricePerHour * 6);
-        
+
         // Adjust based on group size if needed
         let multiplier = 1;
         if (bookingPeople.includes('5-8')) multiplier = 1.25;
         if (bookingPeople.includes('8+')) multiplier = 1.5;
-        
+
         return Math.round(basePrice * multiplier);
     };
 
@@ -189,7 +189,7 @@ export default function TrekkingGuides() {
                         <ShieldCheck className="w-4 h-4 text-[#BFA76A]" />
                         <span className="text-[10px] tracking-[0.3em] font-bold uppercase">Certified Local Guides</span>
                     </motion.div>
-                    <motion.h1 
+                    <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
@@ -198,13 +198,13 @@ export default function TrekkingGuides() {
                     >
                         Professional Guides
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
                         className="text-lg md:text-xl font-light tracking-wide max-w-2xl mx-auto opacity-90 drop-shadow-md lg:mb-12"
                     >
-                        Explore hidden trails and misty peaks with Yelagiri's most experienced trekking experts.
+                        Explore hidden trails and misty peaks with Yelagiri&apos;s most experienced trekking experts.
                     </motion.p>
                 </div>
             </section>
@@ -212,7 +212,7 @@ export default function TrekkingGuides() {
             {/* Main Content */}
             <section className="container mx-auto px-6 md:px-12 lg:px-24 -mt-16 relative z-30 pb-24">
                 {/* Search Bar */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6 }}
@@ -220,8 +220,8 @@ export default function TrekkingGuides() {
                 >
                     <div className="flex-1 relative group">
                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-[#1F3D2B] transition-colors" />
-                        <input 
-                            type="text" 
+                        <input
+                            type="text"
                             placeholder="Search by name, expertise or trail..."
                             className="w-full pl-14 pr-6 py-5 rounded-[2rem] bg-gray-50/50 border-none focus:ring-2 focus:ring-[#1f3d2b]/10 text-[#1f3d2b] font-medium placeholder:text-gray-400 transition-all"
                             value={searchQuery}
@@ -229,7 +229,7 @@ export default function TrekkingGuides() {
                         />
                     </div>
                     <div className="flex gap-3">
-                        <button 
+                        <button
                             onClick={() => setViewMode(viewMode === 'grid' ? 'map' : 'grid')}
                             className="px-8 py-5 bg-[#1f3d2b] text-white rounded-[2rem] font-bold flex items-center gap-3 hover:bg-[#2a523a] transition-all shadow-lg shadow-[#1f3d2b]/20 active:scale-95"
                         >
@@ -248,10 +248,10 @@ export default function TrekkingGuides() {
                                 <h3 className="font-bold text-[#1F3D2B]">Hourly Rate</h3>
                                 <span className="text-sm font-medium text-[#BFA76A]">₹{priceRange}</span>
                             </div>
-                            <input 
-                                type="range" 
-                                min="200" 
-                                max="5000" 
+                            <input
+                                type="range"
+                                min="200"
+                                max="5000"
                                 step="100"
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
@@ -268,7 +268,7 @@ export default function TrekkingGuides() {
                             <h3 className="font-bold text-[#1F3D2B]">Trail Locations</h3>
                             <div className="flex flex-wrap gap-2">
                                 {locationOptions.map(loc => (
-                                    <button 
+                                    <button
                                         key={loc.name}
                                         onClick={() => {
                                             if (selectedLocations.includes(loc.name)) {
@@ -277,11 +277,10 @@ export default function TrekkingGuides() {
                                                 setSelectedLocations([...selectedLocations, loc.name]);
                                             }
                                         }}
-                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${
-                                            selectedLocations.includes(loc.name)
-                                            ? 'bg-[#BFA76A] text-white border-[#BFA76A]'
-                                            : 'bg-white text-gray-600 border-gray-100 hover:border-[#BFA76A]'
-                                        }`}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all flex items-center gap-2 ${selectedLocations.includes(loc.name)
+                                                ? 'bg-[#BFA76A] text-white border-[#BFA76A]'
+                                                : 'bg-white text-gray-600 border-gray-100 hover:border-[#BFA76A]'
+                                            }`}
                                     >
                                         <span className="text-base">{loc.icon}</span>
                                         {loc.name}
@@ -295,7 +294,7 @@ export default function TrekkingGuides() {
                             <h3 className="font-bold text-[#1F3D2B]">Languages Spoken</h3>
                             <div className="flex flex-wrap gap-2">
                                 {languages.map(lang => (
-                                    <button 
+                                    <button
                                         key={lang}
                                         onClick={() => {
                                             if (selectedLanguages.includes(lang)) {
@@ -304,11 +303,10 @@ export default function TrekkingGuides() {
                                                 setSelectedLanguages([...selectedLanguages, lang]);
                                             }
                                         }}
-                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${
-                                            selectedLanguages.includes(lang)
-                                            ? 'bg-[#1F3D2B] text-white border-[#1F3D2B]'
-                                            : 'bg-white text-gray-600 border-gray-100 hover:border-[#BFA76A]'
-                                        }`}
+                                        className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all ${selectedLanguages.includes(lang)
+                                                ? 'bg-[#1F3D2B] text-white border-[#1F3D2B]'
+                                                : 'bg-white text-gray-600 border-gray-100 hover:border-[#BFA76A]'
+                                            }`}
                                     >
                                         {lang}
                                     </button>
@@ -322,15 +320,14 @@ export default function TrekkingGuides() {
                             <div className="space-y-2">
                                 {expertiseOptions.map(exp => (
                                     <label key={exp} className="flex items-center gap-3 cursor-pointer group">
-                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
-                                            selectedExpertise.includes(exp)
-                                            ? 'bg-[#1F3D2B] border-[#1F3D2B] text-white'
-                                            : 'border-gray-200 group-hover:border-[#BFA76A]'
-                                        }`}>
+                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${selectedExpertise.includes(exp)
+                                                ? 'bg-[#1F3D2B] border-[#1F3D2B] text-white'
+                                                : 'border-gray-200 group-hover:border-[#BFA76A]'
+                                            }`}>
                                             {selectedExpertise.includes(exp) && <Check className="w-3 h-3" />}
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             className="hidden"
                                             checked={selectedExpertise.includes(exp)}
                                             onChange={() => {
@@ -352,14 +349,13 @@ export default function TrekkingGuides() {
                             <h3 className="font-bold text-[#1F3D2B]">Minimum Rating</h3>
                             <div className="flex gap-2">
                                 {[3, 4, 4.5].map(rate => (
-                                    <button 
+                                    <button
                                         key={rate}
                                         onClick={() => setMinRating(minRating === rate ? 0 : rate)}
-                                        className={`flex-1 py-3 rounded-xl text-xs font-bold border transition-all ${
-                                            minRating === rate
-                                            ? 'bg-[#BFA76A] text-white border-[#BFA76A]'
-                                            : 'bg-white text-gray-600 border-gray-100'
-                                        }`}
+                                        className={`flex-1 py-3 rounded-xl text-xs font-bold border transition-all ${minRating === rate
+                                                ? 'bg-[#BFA76A] text-white border-[#BFA76A]'
+                                                : 'bg-white text-gray-600 border-gray-100'
+                                            }`}
                                     >
                                         {rate}+ ★
                                     </button>
@@ -368,7 +364,7 @@ export default function TrekkingGuides() {
                         </div>
 
                         {(searchQuery || selectedLanguages.length > 0 || selectedExpertise.length > 0 || minRating > 0 || priceRange < 5000) && (
-                            <button 
+                            <button
                                 onClick={() => {
                                     setSearchQuery('');
                                     setPriceRange(5000);
@@ -402,7 +398,7 @@ export default function TrekkingGuides() {
                                                 >
                                                     {/* Image Section */}
                                                     <div className="w-full md:w-72 h-64 md:h-auto relative rounded-[1.5rem] overflow-hidden flex-shrink-0">
-                                                        <Image 
+                                                        <Image
                                                             src={guide.image}
                                                             alt={guide.name}
                                                             fill
@@ -471,13 +467,13 @@ export default function TrekkingGuides() {
                                                                 <span className="text-lg font-bold text-[#1F3D2B]">₹{guide.pricePerGroup || (guide.pricePerHour * 6)} / Experience</span>
                                                             </div>
                                                             <div className="flex gap-3">
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleViewProfile(guide)}
                                                                     className="px-6 py-3 border border-[#1F3D2B]/10 rounded-xl text-xs font-bold uppercase tracking-widest text-[#1F3D2B] hover:bg-[#1F3D2B] hover:text-white transition-all shadow-sm"
                                                                 >
                                                                     Profile
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => handleBookNow(guide)}
                                                                     className="px-6 py-3 bg-[#BFA76A] text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#a68d52] shadow-lg shadow-[#BFA76A]/20 transition-all flex items-center gap-2"
                                                                 >
@@ -496,7 +492,7 @@ export default function TrekkingGuides() {
                                             </div>
                                             <h3 className="text-xl font-bold text-[#1F3D2B] mb-2">No guides found</h3>
                                             <p className="text-gray-400 max-w-xs mx-auto">Try adjusting your filters or search query to find available trekking experts.</p>
-                                            <button 
+                                            <button
                                                 onClick={() => {
                                                     setSearchQuery('');
                                                     setPriceRange(5000);
@@ -524,18 +520,18 @@ export default function TrekkingGuides() {
                                         <h3 className="text-xl font-bold text-[#1f3d2b] mb-2">Interactive Trail Map</h3>
                                         <p className="text-gray-400 text-sm max-w-xs mx-auto">Explore guides based on their current locations and nearby trails in Neel Hills and Swamimalai.</p>
                                     </div>
-                                    
+
                                     {/* Mock Pointers */}
                                     {filteredGuides.map((guide, i) => (
-                                        <motion.div 
+                                        <motion.div
                                             key={i}
                                             initial={{ scale: 0 }}
                                             animate={{ scale: 1 }}
                                             transition={{ delay: i * 0.1 }}
                                             className="absolute cursor-pointer group"
-                                            style={{ 
-                                                top: `${20 + (i * 15) % 60}%`, 
-                                                left: `${20 + (i * 25) % 60}%` 
+                                            style={{
+                                                top: `${20 + (i * 15) % 60}%`,
+                                                left: `${20 + (i * 25) % 60}%`
                                             }}
                                             onClick={() => handleViewProfile(guide)}
                                         >
@@ -577,22 +573,22 @@ export default function TrekkingGuides() {
             {/* Guide Profile / Booking Modal */}
             <AnimatePresence>
                 {bookingMode && selectedGuide && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8"
                     >
                         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setBookingMode(null)} />
-                        
-                        <motion.div 
+
+                        <motion.div
                             initial={{ scale: 0.9, y: 50 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.9, y: 50 }}
                             className="relative w-full max-w-5xl bg-[#FAFBF9] rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row h-full max-h-[90vh]"
                         >
                             {/* Close Button */}
-                            <button 
+                            <button
                                 onClick={() => setBookingMode(null)}
                                 className="absolute top-6 right-6 z-50 p-3 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-full text-white md:text-[#1F3D2B] md:bg-gray-100 md:hover:bg-gray-200 transition-all"
                             >
@@ -601,16 +597,16 @@ export default function TrekkingGuides() {
 
                             {/* Left Side: Images & Video */}
                             <div className="w-full md:w-2/5 relative h-64 md:h-auto group">
-                                <Image 
+                                <Image
                                     src={selectedGuide.image}
                                     alt={selectedGuide.name}
                                     fill
                                     className="object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                                
+
                                 {selectedGuide.videoUrl && !isPlayingVideo && (
-                                    <button 
+                                    <button
                                         onClick={() => setIsPlayingVideo(true)}
                                         className="absolute inset-0 flex items-center justify-center group/play bg-black/20 hover:bg-black/40 transition-all"
                                     >
@@ -622,15 +618,15 @@ export default function TrekkingGuides() {
 
                                 {isPlayingVideo && selectedGuide.videoUrl && (
                                     <div className="absolute inset-0 bg-black z-10">
-                                        <iframe 
+                                        <iframe
                                             className="w-full h-full"
-                                            src={selectedGuide.videoUrl.replace('watch?v=', 'embed/')} 
+                                            src={selectedGuide.videoUrl.replace('watch?v=', 'embed/')}
                                             title="Guide Intro Video"
                                             frameBorder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                             allowFullScreen
                                         ></iframe>
-                                        <button 
+                                        <button
                                             onClick={() => setIsPlayingVideo(false)}
                                             className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white"
                                         >
@@ -715,7 +711,7 @@ export default function TrekkingGuides() {
                                                                     <Star key={starI} className={`w-3 h-3 ${starI < Math.floor(rev.rating) ? 'fill-[#BFA76A] text-[#BFA76A]' : 'text-gray-200'}`} />
                                                                 ))}
                                                             </div>
-                                                            <p className="text-xs text-gray-500 leading-relaxed italic">"{rev.comment}"</p>
+                                                            <p className="text-xs text-gray-500 leading-relaxed italic">&quot;{rev.comment}&quot;</p>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -728,7 +724,7 @@ export default function TrekkingGuides() {
                                                         <div className="text-3xl font-bold text-[#1F3D2B]">₹{selectedGuide.pricePerGroup || (selectedGuide.pricePerHour * 6)}</div>
                                                     </div>
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={() => setBookingMode('booking')}
                                                     className="px-8 py-5 bg-[#1F3D2B] text-white rounded-2xl font-bold uppercase tracking-widest hover:bg-[#2a523a] shadow-xl shadow-[#1F3D2B]/20 transition-all flex items-center gap-3"
                                                 >
@@ -739,7 +735,7 @@ export default function TrekkingGuides() {
                                     ) : bookingMode === 'booking' ? (
                                         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 overflow-y-auto max-h-[70vh] pr-2 custom-scrollbar">
                                             <div className="flex items-center gap-4 mb-2 sticky top-0 bg-[#FAFBF9] z-20 py-2">
-                                                <button 
+                                                <button
                                                     onClick={() => setBookingMode('profile')}
                                                     className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
                                                 >
@@ -751,10 +747,10 @@ export default function TrekkingGuides() {
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Preferred Date <span className="text-red-500">*</span></label>
-                                                    <input 
-                                                        type="date" 
+                                                    <input
+                                                        type="date"
                                                         id="guideBookingDate"
-                                                        className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 font-medium text-[#1F3D2B] focus:outline-none focus:ring-2 focus:ring-[#BFA76A]/20" 
+                                                        className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 font-medium text-[#1F3D2B] focus:outline-none focus:ring-2 focus:ring-[#BFA76A]/20"
                                                         value={bookingDate}
                                                         onChange={(e) => setBookingDate(e.target.value)}
                                                         required
@@ -762,7 +758,7 @@ export default function TrekkingGuides() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Number of People</label>
-                                                    <select 
+                                                    <select
                                                         id="guideBookingPeople"
                                                         className="w-full px-5 py-4 rounded-2xl bg-white border border-gray-100 font-medium text-[#1F3D2B] focus:outline-none focus:ring-2 focus:ring-[#BFA76A]/20"
                                                         value={bookingPeople}
@@ -789,19 +785,18 @@ export default function TrekkingGuides() {
                                                 </div>
                                                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                                                     {['06:00 AM', '09:00 AM', '02:00 PM', '04:00 PM'].map(slot => (
-                                                        <button 
-                                                            key={slot} 
+                                                        <button
+                                                            key={slot}
                                                             id={`slot-${slot.replace(/\s+/g, '-')}`}
                                                             onClick={() => setBookingSlot(slot)}
-                                                            className={`py-4 border rounded-2xl text-xs font-bold transition-all relative overflow-hidden group ${
-                                                                bookingSlot === slot 
-                                                                ? 'bg-[#1F3D2B] border-[#1F3D2B] text-white shadow-xl scale-[1.02]'
-                                                                : 'border-gray-100 text-[#1F3D2B] bg-white hover:border-[#BFA76A] hover:text-[#BFA76A]'
-                                                            }`}
+                                                            className={`py-4 border rounded-2xl text-xs font-bold transition-all relative overflow-hidden group ${bookingSlot === slot
+                                                                    ? 'bg-[#1F3D2B] border-[#1F3D2B] text-white shadow-xl scale-[1.02]'
+                                                                    : 'border-gray-100 text-[#1F3D2B] bg-white hover:border-[#BFA76A] hover:text-[#BFA76A]'
+                                                                }`}
                                                         >
                                                             <span className="relative z-10">{slot}</span>
                                                             {bookingSlot === slot && (
-                                                                <motion.div 
+                                                                <motion.div
                                                                     layoutId="activeSlot"
                                                                     className="absolute inset-0 bg-gradient-to-tr from-[#BFA76A]/20 to-transparent pointer-events-none"
                                                                 />
@@ -817,7 +812,7 @@ export default function TrekkingGuides() {
                                             <div className="p-6 bg-[#1F3D2B] rounded-[2.5rem] text-white border border-white/10 shadow-2xl relative overflow-hidden">
                                                 {/* Decorative background circle */}
                                                 <div className="absolute -right-4 -top-4 w-24 h-24 bg-[#BFA76A]/10 rounded-full blur-2xl" />
-                                                
+
                                                 <div className="space-y-4 mb-6 relative z-10">
                                                     <div className="flex justify-between items-center pb-4 border-b border-white/10">
                                                         <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">Cost Breakdown</span>
@@ -869,7 +864,7 @@ export default function TrekkingGuides() {
                                                     </div>
                                                 </div>
 
-                                                <button 
+                                                <button
                                                     onClick={handleConfirmBooking}
                                                     id="secure-slot-button"
                                                     className="w-full py-5 bg-[#BFA76A] text-white rounded-[1.5rem] font-bold uppercase tracking-widest hover:bg-[#a68d52] transition-all flex items-center justify-center gap-3 shadow-xl shadow-black/30 group active:scale-95"

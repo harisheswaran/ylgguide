@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    createBooking, 
-    verifyPayment, 
-    getUserBookings,
+const {
+    createBooking,
+    verifyPayment,
     getMyBookings,
     getBookingForConfirmation,
     getEmailPreview
 } = require('../controllers/bookingController');
 
-const { protect } = require('../middleware/authMiddleware');
 
 router.post('/', createBooking); // Public for guest bookings
 router.post('/verify-payment', verifyPayment); // Public for verification

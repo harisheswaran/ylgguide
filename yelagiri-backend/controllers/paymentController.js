@@ -13,7 +13,7 @@ const handleWebhook = async (req, res) => {
     try {
         // processWebhook automatically detects provider and verifies signature
         const event = await processWebhook(req);
-        
+
         console.log(`🔔 Webhook received:`, event.status);
 
         if (event.status === 'captured') {
@@ -36,7 +36,7 @@ const handleWebhook = async (req, res) => {
  */
 async function handlePaymentSuccess(event) {
     try {
-        const { orderId, transactionId, paymentId, amount, raw } = event;
+        const { orderId, transactionId, paymentId, raw } = event;
 
         // Find payment record by either ID
         const query = transactionId ? { transactionId } : { gatewayOrderId: orderId };
@@ -90,7 +90,7 @@ async function handlePaymentSuccess(event) {
  */
 async function handlePaymentFailed(event) {
     try {
-        const { orderId, transactionId, status, raw } = event;
+        const { orderId, transactionId, raw } = event;
 
         const query = transactionId ? { transactionId } : { gatewayOrderId: orderId };
         const payment = await Payment.findOneAndUpdate(
@@ -122,8 +122,8 @@ async function handlePaymentFailed(event) {
  */
 const getPayment = async (req, res) => {
     try {
-        const payment = await Payment.findOne({ 
-            gatewayPaymentId: req.params.paymentId 
+        const payment = await Payment.findOne({
+            gatewayPaymentId: req.params.paymentId
         }).populate('booking');
 
         if (!payment) {
@@ -138,7 +138,7 @@ const getPayment = async (req, res) => {
             data: payment
         });
 
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch payment'
@@ -162,7 +162,7 @@ const getAllPayments = async (req, res) => {
             success: true,
             data: payments
         });
-    } catch (error) {
+    } catch (_error) {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch payments'

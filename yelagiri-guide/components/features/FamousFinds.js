@@ -30,7 +30,7 @@ const famousFinds = [
         location: "Local Orchards & Athanavur Market",
         time: "9:00 AM - 6:00 PM",
         description: "Yelagiri's signature fruit, known for its incredible sweetness and distinct mountain-grown flavor. Best found in local stalls near the lake.",
-        image: "https://images.unsplash.com/photo-1594916814238-164998064973?auto=format&fit=crop&w=800&q=80",
+        image: "https://images.unsplash.com/photo-1520452112805-c6692c840af0?auto=format&fit=crop&w=800&q=80",
         accent: "from-lime-400 to-green-600"
     }
 ];
@@ -58,7 +58,7 @@ export default function FamousFinds() {
                         <h2 className="text-2xl md:text-4xl font-bold text-[#1F3D2B] leading-tight" style={{ fontFamily: 'var(--font-poppins)' }}>Famous Finds of Yelagiri</h2>
                         <p className="text-sm md:text-base font-light mt-4 max-w-lg text-[#5F6368]">Handpicked specialities that define the authentic mountain experience.</p>
                     </motion.div>
-                    
+
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
@@ -95,14 +95,14 @@ export default function FamousFinds() {
                                     className="object-cover transform group-hover:scale-[1.05] transition-transform duration-1000 ease-out"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
-                                
+
                                 <div className="absolute bottom-6 left-6">
                                     <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-lg text-white text-[10px] uppercase tracking-widest font-bold border border-white/10">
                                         {item.category}
                                     </span>
                                 </div>
                             </div>
-                            
+
                             <div className="p-8 md:p-10 flex flex-col flex-grow">
                                 <h3 className="text-xl md:text-2xl font-bold text-[#1F3D2B] mb-4 group-hover:text-forest-700 transition-colors" style={{ fontFamily: 'var(--font-poppins)' }}>
                                     {item.title}

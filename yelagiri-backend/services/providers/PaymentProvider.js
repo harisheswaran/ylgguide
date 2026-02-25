@@ -12,7 +12,7 @@ class PaymentProvider {
      * @param {Object} data - Order data
      * @returns {Promise<Object>} Provider specific response
      */
-    async createOrder(data) {
+    async createOrder(_data) {
         throw new Error('Method createOrder() must be implemented');
     }
 
@@ -21,7 +21,7 @@ class PaymentProvider {
      * @param {Object} data - Verification data
      * @returns {boolean}
      */
-    verifySignature(data) {
+    verifySignature(_data) {
         throw new Error('Method verifySignature() must be implemented');
     }
 
@@ -31,7 +31,7 @@ class PaymentProvider {
      * @param {string} signature - Webhook signature
      * @returns {Promise<Object>} Processed event data
      */
-    async handleWebhook(payload, signature) {
+    async handleWebhook(_payload, _signature) {
         throw new Error('Method handleWebhook() must be implemented');
     }
 }

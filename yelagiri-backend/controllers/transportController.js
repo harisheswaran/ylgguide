@@ -1,5 +1,5 @@
 const Transport = require('../models/Transport');
-const externalService = require('../services/externalTransportService');
+
 const fs = require('fs');
 const csv = require('csv-parser');
 
@@ -10,18 +10,18 @@ const csv = require('csv-parser');
  */
 const getTransports = async (req, res) => {
     try {
-        const { 
-            category, 
+        const {
+            category,
             type, // vehicleType
-            minPrice, 
-            maxPrice, 
-            isAC, 
+            minPrice,
+            maxPrice,
+            isAC,
             rating,
             search,
             page = 1,
             limit = 10
         } = req.query;
-        
+
         let query = {};
 
         // Category Filter
@@ -77,7 +77,7 @@ const getTransports = async (req, res) => {
         }
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
-        
+
         const total = await Transport.countDocuments(query);
         let transports = await Transport.find(query)
             .sort({ 'ratings.overall': -1 })
@@ -165,7 +165,7 @@ const uploadTransportCSV = async (req, res) => {
                 }));
 
                 await Transport.insertMany(mappedData);
-                
+
                 // Clean up file
                 fs.unlinkSync(filePath);
 

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AIChatModal({ isOpen, onClose, dark = false }) {
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: 'Hello! I am your Go Elagiri AI. How can I help you plan your trip today?' }
+        { role: 'assistant', content: 'Hello! I am your Go Yelagiri AI. How can I help you plan your trip today?' }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -101,7 +101,7 @@ export default function AIChatModal({ isOpen, onClose, dark = false }) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h3 className={`font-bold ${dark ? 'text-white' : 'text-slate-800'}`}>Go Elagiri AI</h3>
+                                    <h3 className={`font-bold ${dark ? 'text-white' : 'text-slate-800'}`}>Go Yelagiri AI</h3>
                                     <p className={`text-xs flex items-center gap-1 ${dark ? 'text-gray-400' : 'text-slate-500'}`}>
                                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                                         Online

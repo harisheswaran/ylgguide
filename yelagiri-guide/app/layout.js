@@ -31,7 +31,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata = {
-  title: "Go Elagiri",
+  title: "Go Yelagiri",
   description: "Your guide to Yelagiri, your way!",
 };
 

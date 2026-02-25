@@ -1,20 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
-import { 
-    Star, 
-    Clock, 
-    CheckCircle2, 
-    ShieldCheck, 
-    ChevronRight, 
-    User, 
-    Heart, 
-    Users, 
+import {
+    Star,
+    Clock,
+    CheckCircle2,
+    ShieldCheck,
+    ChevronRight,
+    User,
+    Heart,
+    Users,
     Trophy,
     CreditCard,
     Mail,
@@ -41,7 +41,7 @@ import Image from 'next/image';
 
 
 // Trip Packages Component 
-export default function TripPackages() {
+function TripPackagesContent() {
     const router = useRouter();
     const { user } = useAuth();
     const searchParams = useSearchParams();
@@ -52,7 +52,7 @@ export default function TripPackages() {
     const [selectedPackage, setSelectedPackage] = useState(null);
     const [bookingStep, setBookingStep] = useState('none'); // none, reviews, form, payment, success
     const [newReview, setNewReview] = useState({ rating: 5, comment: '', user: '' });
-    
+
     // Missing States for Payment Logic
     const [isEmailSending, setIsEmailSending] = useState(false);
     const [name, setName] = useState('');
@@ -115,13 +115,13 @@ export default function TripPackages() {
     const filteredPackages = packages
         .filter(pkg => {
             // 1. Category Filter
-            const matchesCategory = categoryFilter === 'All' || 
-                                  pkg.type.toLowerCase().includes(categoryFilter.toLowerCase()) ||
-                                  pkg.title.toLowerCase().includes(categoryFilter.toLowerCase());
-            
+            const matchesCategory = categoryFilter === 'All' ||
+                pkg.type.toLowerCase().includes(categoryFilter.toLowerCase()) ||
+                pkg.title.toLowerCase().includes(categoryFilter.toLowerCase());
+
             // 2. Duration Filter
-            const matchesDuration = durationFilter === 'All' || 
-                                  pkg.duration.includes(durationFilter);
+            const matchesDuration = durationFilter === 'All' ||
+                pkg.duration.includes(durationFilter);
 
             // 3. Price Filter
             const pkgPrice = parseInt(pkg.price.replace(/[^0-9]/g, ''));
@@ -131,15 +131,15 @@ export default function TripPackages() {
             const matchesStars = selectedStars.length === 0 || selectedStars.includes(pkg.stars);
 
             // 5. Amenities Filter
-            const matchesAmenities = selectedAmenities.length === 0 || 
-                                   selectedAmenities.every(amenity => pkg.amenities?.includes(amenity));
-            
+            const matchesAmenities = selectedAmenities.length === 0 ||
+                selectedAmenities.every(amenity => pkg.amenities?.includes(amenity));
+
             // 6. Rating Filter
             const matchesRating = selectedRatings.length === 0 || selectedRatings.some(criteria => {
-                 if (criteria === '9+') return pkg.rating >= 4.5;
-                 if (criteria === '8+') return pkg.rating >= 4.0;
-                 if (criteria === '7+') return pkg.rating >= 3.5;
-                 return true;
+                if (criteria === '9+') return pkg.rating >= 4.5;
+                if (criteria === '8+') return pkg.rating >= 4.0;
+                if (criteria === '7+') return pkg.rating >= 3.5;
+                return true;
             });
 
             // 7. Location Filter
@@ -227,15 +227,15 @@ export default function TripPackages() {
     const handlePayment = async (e) => {
         e.preventDefault();
         setBookingStep('payment');
-        
+
         // Simulate payment processing then send email
         setTimeout(async () => {
             setBookingStep('processing');
             setIsEmailSending(true);
-            
+
             // Generate booking ID
             const bookingId = `YLG-${Math.floor(100000 + Math.random() * 900000)}`;
-            
+
             // Send email
             try {
                 const response = await fetch('/api/send-booking-email', {
@@ -252,7 +252,7 @@ export default function TripPackages() {
                         bookingId
                     })
                 });
-                
+
                 const data = await response.json();
                 console.log('Email sent:', data);
             } catch (error) {
@@ -286,7 +286,7 @@ export default function TripPackages() {
             });
 
             const data = await response.json();
-            
+
             // Even if API fails (e.g. mock mode without real DB), update local state for the user
             const updatedPackages = packages.map(pkg => {
                 if (pkg.id === selectedPackage.id) {
@@ -304,7 +304,7 @@ export default function TripPackages() {
             setPackages(updatedPackages);
             setSelectedPackage(updatedPackages.find(p => p.id === selectedPackage.id));
             setNewReview({ rating: 5, comment: '', user: '' });
-            
+
             // Show success message or just keep modal open to see the new review
         } catch (error) {
             console.error('Failed to add review:', error);
@@ -351,7 +351,7 @@ export default function TripPackages() {
                         <ShieldCheck className="w-4 h-4 text-[#BFA76A]" />
                         <span className="text-[10px] tracking-[0.3em] font-bold uppercase">Certified Experiences</span>
                     </motion.div>
-                    <motion.h1 
+                    <motion.h1
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
@@ -360,7 +360,7 @@ export default function TripPackages() {
                     >
                         Trip Packages
                     </motion.h1>
-                    <motion.p 
+                    <motion.p
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ delay: 0.4 }}
@@ -369,9 +369,9 @@ export default function TripPackages() {
                         Discover the emerald heart of Yelagiri with our curated travel collections.
                     </motion.p>
                 </div>
-                
+
                 {/* Scroll hint */}
-                <motion.div 
+                <motion.div
                     animate={{ y: [0, 10, 0] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                     className="absolute bottom-10 left-1/2 -translate-x-1/2 text-white/40"
@@ -383,7 +383,7 @@ export default function TripPackages() {
             {/* Main Content Area */}
             <section className="container mx-auto px-6 md:px-12 lg:px-24 py-12">
                 <div className="flex flex-col lg:flex-row gap-12">
-                    
+
                     {/* LEFT SIDEBAR FILTERS */}
                     <div className="w-full lg:w-1/4 flex-shrink-0 space-y-10">
                         {/* Price Filter */}
@@ -392,10 +392,10 @@ export default function TripPackages() {
                                 <h3 className="font-bold text-[#1F3D2B]">Price</h3>
                                 <span className="text-sm font-medium text-[#BFA76A]">₹{priceRange.toLocaleString()}</span>
                             </div>
-                            <input 
-                                type="range" 
-                                min="5000" 
-                                max="50000" 
+                            <input
+                                type="range"
+                                min="5000"
+                                max="50000"
                                 step="1000"
                                 value={priceRange}
                                 onChange={(e) => setPriceRange(parseInt(e.target.value))}
@@ -416,12 +416,12 @@ export default function TripPackages() {
                                         <div className={`w-5 h-5 rounded-full border flex items-center justify-center transition-colors ${selectedRatings.includes(option.value) ? 'border-[#BFA76A] bg-[#BFA76A]' : 'border-gray-300 group-hover:border-[#BFA76A]'}`}>
                                             {selectedRatings.includes(option.value) && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             className="hidden"
                                             checked={selectedRatings.includes(option.value)}
                                             onChange={() => {
-                                                if(selectedRatings.includes(option.value)) {
+                                                if (selectedRatings.includes(option.value)) {
                                                     setSelectedRatings(selectedRatings.filter(r => r !== option.value));
                                                 } else {
                                                     setSelectedRatings([...selectedRatings, option.value]);
@@ -443,12 +443,12 @@ export default function TripPackages() {
                                         <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedLocations.includes(loc.name) ? 'border-[#1F3D2B] bg-[#1F3D2B]' : 'border-gray-300 group-hover:border-[#1F3D2B]'}`}>
                                             {selectedLocations.includes(loc.name) && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             className="hidden"
                                             checked={selectedLocations.includes(loc.name)}
                                             onChange={() => {
-                                                if(selectedLocations.includes(loc.name)) {
+                                                if (selectedLocations.includes(loc.name)) {
                                                     setSelectedLocations(selectedLocations.filter(l => l !== loc.name));
                                                 } else {
                                                     setSelectedLocations([...selectedLocations, loc.name]);
@@ -470,11 +470,11 @@ export default function TripPackages() {
                             <div className="space-y-3">
                                 {categories.map((cat) => (
                                     <label key={cat.name} className="flex items-center gap-3 cursor-pointer group">
-                                         <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${categoryFilter === cat.name ? 'border-[#1F3D2B] bg-[#1F3D2B]' : 'border-gray-300 group-hover:border-[#1F3D2B]'}`}>
+                                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${categoryFilter === cat.name ? 'border-[#1F3D2B] bg-[#1F3D2B]' : 'border-gray-300 group-hover:border-[#1F3D2B]'}`}>
                                             {categoryFilter === cat.name && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                                         </div>
-                                        <input 
-                                            type="radio" 
+                                        <input
+                                            type="radio"
                                             name="category"
                                             className="hidden"
                                             checked={categoryFilter === cat.name}
@@ -497,12 +497,12 @@ export default function TripPackages() {
                                         <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedAmenities.includes(amenity) ? 'border-[#1F3D2B] bg-[#1F3D2B]' : 'border-gray-300 group-hover:border-[#1F3D2B]'}`}>
                                             {selectedAmenities.includes(amenity) && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
                                         </div>
-                                        <input 
-                                            type="checkbox" 
+                                        <input
+                                            type="checkbox"
                                             className="hidden"
                                             checked={selectedAmenities.includes(amenity)}
                                             onChange={() => {
-                                                if(selectedAmenities.includes(amenity)) {
+                                                if (selectedAmenities.includes(amenity)) {
                                                     setSelectedAmenities(selectedAmenities.filter(a => a !== amenity));
                                                 } else {
                                                     setSelectedAmenities([...selectedAmenities, amenity]);
@@ -515,25 +515,24 @@ export default function TripPackages() {
                             </div>
                         </div>
 
-                         {/* Stars */}
+                        {/* Stars */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-[#1F3D2B]">Stars</h3>
                             <div className="flex gap-2">
                                 {starOptions.map((star) => (
-                                    <button 
+                                    <button
                                         key={star}
                                         onClick={() => {
-                                            if(selectedStars.includes(star)) {
+                                            if (selectedStars.includes(star)) {
                                                 setSelectedStars(selectedStars.filter(s => s !== star));
                                             } else {
                                                 setSelectedStars([...selectedStars, star]);
                                             }
                                         }}
-                                        className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm border transition-all ${
-                                            selectedStars.includes(star) 
-                                            ? 'bg-[#1F3D2B] text-white border-[#1F3D2B]' 
+                                        className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-sm border transition-all ${selectedStars.includes(star)
+                                            ? 'bg-[#1F3D2B] text-white border-[#1F3D2B]'
                                             : 'bg-white text-gray-600 border-gray-200 hover:border-[#BFA76A]'
-                                        }`}
+                                            }`}
                                     >
                                         {star}★
                                     </button>
@@ -542,7 +541,7 @@ export default function TripPackages() {
                         </div>
 
                         {/* Reset Filters Button */}
-                        <button 
+                        <button
                             onClick={() => {
                                 setCategoryFilter('All');
                                 setPriceRange(50000); // Reset to max default
@@ -562,7 +561,7 @@ export default function TripPackages() {
 
                     {/* RIGHT CONTENT GRID */}
                     <div className="flex-1">
-                        
+
                         {/* Favorites Mode Banner */}
                         {showFavoritesOnly && (
                             <div className="mb-8 p-6 bg-red-50 rounded-3xl border border-red-100 flex items-center justify-between">
@@ -575,7 +574,7 @@ export default function TripPackages() {
                                         <p className="text-sm text-gray-500">Viewing only your saved collections</p>
                                     </div>
                                 </div>
-                                <button 
+                                <button
                                     onClick={() => router.push('/trip-packages')}
                                     className="px-5 py-2.5 bg-white text-gray-600 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-gray-50 border border-gray-100 transition-colors"
                                 >
@@ -586,20 +585,20 @@ export default function TripPackages() {
 
                         {/* Top Bar */}
                         <div className="flex flex-col md:flex-row justify-between items-center mb-8 pb-8 border-b border-gray-100 gap-4">
-                             <div>
+                            <div>
                                 <h2 className="text-2xl font-bold text-[#1F3D2B] mb-1">Properties found</h2>
                                 <p className="text-sm text-gray-400 font-medium">{filteredPackages.length} collections match your search</p>
-                             </div>
+                            </div>
 
-                             <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
                                 <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Sort By:</span>
                                 <div className="relative group">
-                                     <button className="flex items-center gap-2 text-sm font-bold text-[#1F3D2B] hover:text-[#BFA76A] transition-colors">
+                                    <button className="flex items-center gap-2 text-sm font-bold text-[#1F3D2B] hover:text-[#BFA76A] transition-colors">
                                         {sortBy} <ChevronRight className="w-4 h-4 rotate-90" />
-                                     </button>
-                                     <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block z-50">
+                                    </button>
+                                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 hidden group-hover:block z-50">
                                         {['Recommended', 'Price: Low to High', 'Price: High to Low', 'Highest Rated'].map(opt => (
-                                            <button 
+                                            <button
                                                 key={opt}
                                                 onClick={() => setSortBy(opt)}
                                                 className={`w-full text-left px-4 py-2 text-xs font-bold hover:bg-gray-50 ${sortBy === opt ? 'text-[#BFA76A]' : 'text-gray-600'}`}
@@ -607,12 +606,12 @@ export default function TripPackages() {
                                                 {opt}
                                             </button>
                                         ))}
-                                     </div>
+                                    </div>
                                 </div>
-                             </div>
+                            </div>
                         </div>
 
-                         {/* Packages Grid */}
+                        {/* Packages Grid */}
                         {filteredPackages.length === 0 ? (
                             <div className="text-center py-24">
                                 <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -620,11 +619,11 @@ export default function TripPackages() {
                                 </div>
                                 <h3 className="text-xl font-bold text-[#1F3D2B] mb-2">No matches found</h3>
                                 <p className="text-slate-400 text-sm max-w-xs mx-auto mb-8">Try adjusting your filters or price range to find what you&apos;re looking for.</p>
-                                <button 
+                                <button
                                     onClick={() => {
                                         setCategoryFilter('All');
                                         setPriceRange(50000);
-                                setSelectedStars([]);
+                                        setSelectedStars([]);
                                         setSelectedAmenities([]);
                                         setSelectedRatings([]);
                                         setSelectedLocations([]);
@@ -635,9 +634,9 @@ export default function TripPackages() {
                                 </button>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 gap-8"> 
+                            <div className="grid grid-cols-1 gap-8">
                                 {/* Changed to Single Column List View or Keep Grid? Design shows List View blocks. Let's stick to Grid or List provided. Design image shows List View with Image on Left. I will keep Grid for now but maybe Stacked Cards for 'List View' feel? The user said "Test if it works". I'll keep the Card design but maybe make it stacked if needed. For now preserving the Grid but with 2 columns it fits nicely. */}
-                                
+
                                 <AnimatePresence mode='popLayout'>
                                     {filteredPackages.map((pkg) => (
                                         <motion.div
@@ -678,7 +677,7 @@ export default function TripPackages() {
                                                             <span className="text-xs text-[#BFA76A] font-bold px-2 py-0.5 bg-amber-50 rounded ml-2 flex items-center gap-1">
                                                                 <Map className="w-3 h-3" /> {pkg.locationName || 'Yelagiri'}
                                                             </span>
-                                                            <button 
+                                                            <button
                                                                 onClick={() => handleViewReviews(pkg)}
                                                                 className="text-xs text-[#BFA76A] font-bold hover:underline flex items-center gap-1 ml-2"
                                                             >
@@ -687,7 +686,7 @@ export default function TripPackages() {
                                                         </div>
                                                     </div>
                                                     {/* Favorite Button */}
-                                                    <button 
+                                                    <button
                                                         onClick={() => toggleFavorite(pkg.id)}
                                                         className={`p-2 rounded-full hover:bg-gray-50 transition-colors ${favorites.includes(pkg.id) ? 'text-red-500 bg-red-50' : 'text-gray-300 hover:text-red-500'}`}
                                                     >
@@ -696,16 +695,16 @@ export default function TripPackages() {
                                                 </div>
 
                                                 <div className="flex flex-wrap gap-3 mb-6">
-                                                     {pkg.amenities?.slice(0, 4).map((am, i) => (
-                                                         <span key={i} className="px-3 py-1 rounded-lg bg-gray-50 text-xs font-medium text-gray-500 border border-gray-100">
+                                                    {pkg.amenities?.slice(0, 4).map((am, i) => (
+                                                        <span key={i} className="px-3 py-1 rounded-lg bg-gray-50 text-xs font-medium text-gray-500 border border-gray-100">
                                                             {am}
-                                                         </span>
-                                                     ))}
-                                                     {pkg.amenities?.length > 4 && (
-                                                         <span className="px-3 py-1 rounded-lg bg-gray-50 text-xs font-medium text-[#BFA76A]">
+                                                        </span>
+                                                    ))}
+                                                    {pkg.amenities?.length > 4 && (
+                                                        <span className="px-3 py-1 rounded-lg bg-gray-50 text-xs font-medium text-[#BFA76A]">
                                                             +{pkg.amenities.length - 4} More
-                                                         </span>
-                                                     )}
+                                                        </span>
+                                                    )}
                                                 </div>
 
                                                 <div className="mt-auto flex items-center justify-between">
@@ -713,20 +712,20 @@ export default function TripPackages() {
                                                         <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">Price per couple</span>
                                                         <span className="text-2xl font-bold text-[#1F3D2B]">{pkg.price}</span>
                                                     </div>
-                                                    
+
                                                     <div className="flex gap-3">
-                                                         <button 
+                                                        <button
                                                             onClick={() => handleViewDetails(pkg)}
                                                             className="px-6 py-3 border border-[#1F3D2B]/10 rounded-xl text-xs font-bold uppercase tracking-widest text-[#1F3D2B] hover:bg-[#1F3D2B] hover:text-white transition-colors"
-                                                         >
+                                                        >
                                                             More Details
-                                                         </button>
-                                                         <button 
+                                                        </button>
+                                                        <button
                                                             onClick={() => handleBookNow(pkg)}
                                                             className="px-6 py-3 bg-[#BFA76A] text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-[#a68d52] shadow-lg shadow-[#BFA76A]/20 transition-all"
-                                                         >
+                                                        >
                                                             Book Now
-                                                         </button>
+                                                        </button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -749,14 +748,14 @@ export default function TripPackages() {
                         className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6"
                     >
                         <div className="absolute inset-0 bg-black/70 backdrop-blur-md" onClick={() => setBookingStep('none')}></div>
-                        
+
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0, y: 20 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
                             exit={{ scale: 0.95, opacity: 0, y: 20 }}
                             className="bg-white rounded-[2.5rem] w-full max-w-2xl relative z-20 overflow-hidden shadow-[0_25px_100px_rgba(0,0,0,0.5)] flex flex-col max-h-[90vh]"
                         >
-                            <button 
+                            <button
                                 onClick={() => setBookingStep('none')}
                                 className="absolute top-8 right-8 p-2 rounded-full hover:bg-gray-100 transition-colors z-30 bg-white/80"
                             >
@@ -765,17 +764,17 @@ export default function TripPackages() {
 
                             {/* Modal Content Scrollable Area */}
                             <div className="overflow-y-auto flex-1 custom-scrollbar">
-                                
+
                                 {/* 0. DETAILS MODAL */}
                                 {bookingStep === 'details' && (
                                     <div className="p-0">
                                         {/* Header Image */}
                                         <div className="relative h-64 md:h-80 w-full">
-                                            <Image 
-                                                src={selectedPackage.image} 
-                                                alt={selectedPackage.title} 
-                                                fill 
-                                                className="object-cover" 
+                                            <Image
+                                                src={selectedPackage.image}
+                                                alt={selectedPackage.title}
+                                                fill
+                                                className="object-cover"
                                             />
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent"></div>
                                             <div className="absolute bottom-6 left-6 md:left-10 text-white">
@@ -837,14 +836,14 @@ export default function TripPackages() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div className="grid md:grid-cols-2 gap-8 pt-6 border-t border-gray-100">
                                                 {/* Exclusions */}
                                                 <div>
                                                     <h3 className="text-sm font-bold text-red-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                                                         <X className="w-4 h-4" /> Exclusions
                                                     </h3>
-                                                     <ul className="space-y-2">
+                                                    <ul className="space-y-2">
                                                         {selectedPackage.exclusions?.map((exc, i) => (
                                                             <li key={i} className="text-sm text-gray-500 italic decoration-slate-300">
                                                                 • {exc}
@@ -852,7 +851,7 @@ export default function TripPackages() {
                                                         ))}
                                                     </ul>
                                                 </div>
-                                                
+
                                                 {/* Special Offers */}
                                                 <div className="bg-gold-50/50 p-5 rounded-2xl border border-[#BFA76A]/20">
                                                     <h3 className="text-sm font-bold text-[#BFA76A] uppercase tracking-widest mb-3 flex items-center gap-2">
@@ -874,7 +873,7 @@ export default function TripPackages() {
                                                     <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Total Price</p>
                                                     <p className="text-3xl font-bold text-[#1F3D2B]">{selectedPackage.price}</p>
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={() => handleBookNow(selectedPackage)}
                                                     className="px-8 py-4 bg-[#1F3D2B] text-white rounded-xl text-sm font-bold uppercase tracking-widest hover:bg-forest-800 shadow-xl shadow-[#1F3D2B]/20 transition-all transform hover:-translate-y-1"
                                                 >
@@ -907,20 +906,20 @@ export default function TripPackages() {
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Your Name</label>
-                                                        <input 
+                                                        <input
                                                             required
-                                                            type="text" 
+                                                            type="text"
                                                             value={newReview.user}
-                                                            onChange={(e) => setNewReview({...newReview, user: e.target.value})}
-                                                            className="w-full px-5 py-3 rounded-xl bg-white border border-gray-100 focus:border-[#BFA76A] focus:outline-none text-sm" 
-                                                            placeholder="John Doe" 
+                                                            onChange={(e) => setNewReview({ ...newReview, user: e.target.value })}
+                                                            className="w-full px-5 py-3 rounded-xl bg-white border border-gray-100 focus:border-[#BFA76A] focus:outline-none text-sm"
+                                                            placeholder="John Doe"
                                                         />
                                                     </div>
                                                     <div>
                                                         <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Rating</label>
-                                                        <select 
+                                                        <select
                                                             value={newReview.rating}
-                                                            onChange={(e) => setNewReview({...newReview, rating: parseInt(e.target.value)})}
+                                                            onChange={(e) => setNewReview({ ...newReview, rating: parseInt(e.target.value) })}
                                                             className="w-full px-5 py-3 rounded-xl bg-white border border-gray-100 focus:border-[#BFA76A] focus:outline-none text-sm"
                                                         >
                                                             <option value="5">5 Stars - Exceptional</option>
@@ -933,12 +932,12 @@ export default function TripPackages() {
                                                 </div>
                                                 <div>
                                                     <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2 block">Your Feedback</label>
-                                                    <textarea 
+                                                    <textarea
                                                         required
                                                         value={newReview.comment}
-                                                        onChange={(e) => setNewReview({...newReview, comment: e.target.value})}
-                                                        className="w-full px-5 py-3 rounded-xl bg-white border border-gray-100 focus:border-[#BFA76A] focus:outline-none text-sm h-24 resize-none" 
-                                                        placeholder="Share your experience..." 
+                                                        onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                                                        className="w-full px-5 py-3 rounded-xl bg-white border border-gray-100 focus:border-[#BFA76A] focus:outline-none text-sm h-24 resize-none"
+                                                        placeholder="Share your experience..."
                                                     />
                                                 </div>
                                                 <button className="w-full py-4 bg-[#BFA76A] text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#a68d52] shadow-lg shadow-[#BFA76A]/20 transition-all">Submit My Review</button>
@@ -1000,3 +999,10 @@ export default function TripPackages() {
     );
 }
 
+export default function TripPackages() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#FAFBF9] flex items-center justify-center"><div className="w-8 h-8 border-2 border-[#1F3D2B]/20 border-t-[#1F3D2B] rounded-full animate-spin" /></div>}>
+            <TripPackagesContent />
+        </Suspense>
+    );
+}

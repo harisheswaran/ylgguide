@@ -24,7 +24,6 @@ const path = require('path');
 const downloadInvoice = async (req, res) => {
     try {
         const { id } = req.params;
-        const { token } = req.query;
 
         console.log(`\n⬇️ Request: Download Invoice ID: ${id}`);
 
@@ -36,38 +35,38 @@ const downloadInvoice = async (req, res) => {
             console.log(`🎭 MOCK DOWNLOAD: Generating generic fallback for ${id}`);
             // Default to PACKAGE if not found (fixes user issue with Trek details showing up)
             const mockInvoice = {
-                 invoiceNumber: (id === 'mock_invoice_id' || id.startsWith('mock_')) ? `INV-MOCK-${Date.now()}` : id,
-                 invoiceDate: new Date(),
-                 dueDate: new Date(),
-                  guestName: 'Deepak Kumar',
-                  guestEmail: 'deepak@test.com',
-                  guestPhone: '+91 99887 76655',
-                  packageName: 'Elite Yelagiri Escape Package',
-                  packageDescription: 'A luxury stay in the heart of Yelagiri with all amenities included.',
-                  baseAmount: 14000,
-                  gstAmount: 2520,
-                  totalAmount: 16520,
-                  gstRate: 18,
-                  numberOfGuests: 3,
-                  rooms: 1,
-                  accommodationType: 'Villa',
-                  checkInDate: new Date(Date.now() + 86400000),
-                  checkOutDate: new Date(Date.now() + 86400000 * 3),
-                  // Clear guide fields to prevent Trek template trigger
-                  bookingDate: null, 
-                  guideEmail: null,
-                  // Ensure PDF generation works
-                  generationStatus: 'generated'
+                invoiceNumber: (id === 'mock_invoice_id' || id.startsWith('mock_')) ? `INV-MOCK-${Date.now()}` : id,
+                invoiceDate: new Date(),
+                dueDate: new Date(),
+                guestName: 'Deepak Kumar',
+                guestEmail: 'deepak@test.com',
+                guestPhone: '+91 99887 76655',
+                packageName: 'Elite Yelagiri Escape Package',
+                packageDescription: 'A luxury stay in the heart of Yelagiri with all amenities included.',
+                baseAmount: 14000,
+                gstAmount: 2520,
+                totalAmount: 16520,
+                gstRate: 18,
+                numberOfGuests: 3,
+                rooms: 1,
+                accommodationType: 'Villa',
+                checkInDate: new Date(Date.now() + 86400000),
+                checkOutDate: new Date(Date.now() + 86400000 * 3),
+                // Clear guide fields to prevent Trek template trigger
+                bookingDate: null,
+                guideEmail: null,
+                // Ensure PDF generation works
+                generationStatus: 'generated'
             };
-            
+
             const invoiceDir = path.join(__dirname, '../invoices');
             if (!fs.existsSync(invoiceDir)) fs.mkdirSync(invoiceDir, { recursive: true });
-            
+
             const filePath = path.join(invoiceDir, `${mockInvoice.invoiceNumber}.pdf`);
             const { generateInvoicePDF } = require('../utils/invoiceGenerator');
-            
+
             await generateInvoicePDF(mockInvoice, filePath);
-            
+
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `attachment; filename="${mockInvoice.invoiceNumber}.pdf"`);
             const fileStream = fs.createReadStream(filePath);
@@ -100,17 +99,17 @@ const downloadInvoice = async (req, res) => {
                 // Re-fetch
                 const updatedInvoice = await getInvoiceById(id);
                 if (updatedInvoice.pdfPath && fs.existsSync(updatedInvoice.pdfPath)) {
-                     console.log(`   ✅ Regeneration Successful. Streaming...`);
-                     res.setHeader('Content-Type', 'application/pdf');
-                     res.setHeader('Content-Disposition', `attachment; filename="Invoice-${updatedInvoice.invoiceNumber}.pdf"`);
-                     const fileStream = fs.createReadStream(updatedInvoice.pdfPath);
-                     fileStream.pipe(res);
-                     return;
+                    console.log(`   ✅ Regeneration Successful. Streaming...`);
+                    res.setHeader('Content-Type', 'application/pdf');
+                    res.setHeader('Content-Disposition', `attachment; filename="Invoice-${updatedInvoice.invoiceNumber}.pdf"`);
+                    const fileStream = fs.createReadStream(updatedInvoice.pdfPath);
+                    fileStream.pipe(res);
+                    return;
                 }
             } catch (regenErr) {
                 console.error("Failed to regenerate invoice:", regenErr);
             }
-            
+
             console.log(`❌ PDF still missing after regen attempt.`);
             return res.status(404).json({
                 success: false,
@@ -156,7 +155,7 @@ const getInvoice = async (req, res) => {
         }
 
         const invoice = await getInvoiceById(id);
-        
+
         if (!invoice) {
             return res.status(404).json({
                 success: false,
@@ -200,44 +199,44 @@ const getInvoiceByBooking = async (req, res) => {
         // Check if bookingId is a valid ObjectId (Standard Flow)
         if (mongoose.Types.ObjectId.isValid(bookingId)) {
             invoice = await getInvoiceByBookingId(bookingId);
-            
+
             // Auto-generate if missing for confirmed booking
             if (!invoice) {
                 console.log(`   Invoice missing. Checking booking details for auto-gen...`);
-                
+
                 // Try to find in both collections
                 const PackageBooking = require('../models/PackageBooking');
                 const GuideBooking = require('../models/GuideBooking');
-                
+
                 let booking = await PackageBooking.findById(bookingId);
                 let bookingType = 'PackageBooking';
-                
+
                 if (!booking) {
                     booking = await GuideBooking.findById(bookingId);
                     bookingType = 'GuideBooking';
                 }
-                
+
                 if (booking) {
                     console.log(`   Booking Found (${bookingType}). Status: ${booking.bookingStatus}, Payment: ${booking.paymentStatus}`);
-                    
+
                     // For Demo/Testing: Allow invoice generation for ANY existing booking, even if pending.
                     // This unblocks users who have "stuck" pending bookings from previous tests.
                     const shouldGenerate = true; // Relaxed from: booking.bookingStatus === 'confirmed' ...
 
                     if (shouldGenerate) {
-                         console.log(`⚡ Auto-generating invoice (Forced for Demo)...`);
-                         try {
+                        console.log(`⚡ Auto-generating invoice (Forced for Demo)...`);
+                        try {
                             invoice = await createInvoice(booking);
                             console.log(`   ✅ Invoice Created: ${invoice.invoiceNumber}`);
-                         } catch (err) {
+                        } catch (err) {
                             console.error(`   ❌ Creation Failed: ${err.message}`);
-                         }
-                    } 
+                        }
+                    }
                 } else {
                     console.log(`   ❌ Booking not found in DB.`);
                 }
             }
-        } 
+        }
         // Fallback: Check if it's an Invoice Number manually entered or passed
         else if (bookingId.startsWith('mock_')) {
             console.log(`🎭 MOCK MODE: Returning dummy invoice for demo id: ${bookingId}`);
@@ -258,18 +257,18 @@ const getInvoiceByBooking = async (req, res) => {
                 accommodationType: 'Villa',
                 checkInDate: new Date(Date.now() + 86400000),
                 checkOutDate: new Date(Date.now() + 86400000 * 3),
-                bookingDate: null, 
+                bookingDate: null,
                 guideEmail: null,
                 generationStatus: 'generated',
                 pdfPath: 'mock_path.pdf',
-                toObject: function() { return this; }
+                toObject: function () { return this; }
             };
         }
         else {
             console.log(`⚠️ Search by ID failed (Invalid ObjectID). Trying Invoice Number: ${bookingId}`);
             invoice = await Invoice.findOne({ invoiceNumber: bookingId });
         }
-        
+
         if (!invoice) {
             console.log(`❌ Invoice not found (and not created) for: ${bookingId}`);
             return res.status(404).json({
@@ -335,7 +334,7 @@ const resendInvoice = async (req, res) => {
 const listInvoices = async (req, res) => {
     try {
         const { page = 1, limit = 20, status } = req.query;
-        
+
         const filters = {};
         if (status) {
             filters.generationStatus = status;
@@ -402,7 +401,7 @@ const generateInstantInvoice = async (req, res) => {
 
         const { generateInvoicePDF } = require('../utils/invoiceGenerator');
         const invoiceNumber = `INV-MOCK-${Date.now()}`;
-        
+
         // Map frontend booking data to invoice data structure
         const invoiceData = {
             invoiceNumber,
@@ -413,38 +412,34 @@ const generateInstantInvoice = async (req, res) => {
             guestPhone: bookingData.guestPhone,
             packageName: bookingData.packageName,
             packageDescription: bookingData.packageDescription || 'Premium Package Experience',
-            
+
             // Financials
             baseAmount: bookingData.baseAmount || (bookingData.totalAmount / 1.18),
             gstAmount: bookingData.taxAmount || (bookingData.totalAmount - (bookingData.totalAmount / 1.18)),
             totalAmount: bookingData.totalAmount,
             gstRate: 18,
-            
+
             // Details
             numberOfGuests: bookingData.guests,
             rooms: bookingData.rooms || 1,
             accommodationType: bookingData.accommodationType || 'Standard',
             checkInDate: bookingData.checkIn || new Date(),
             checkOutDate: bookingData.checkOut || new Date(Date.now() + 86400000),
-            
+
             // Flags
-            bookingDate: null, 
+            bookingDate: null,
             guideEmail: null,
             generationStatus: 'generated'
         };
 
         const invoiceDir = path.join(__dirname, '../invoices');
         if (!fs.existsSync(invoiceDir)) fs.mkdirSync(invoiceDir, { recursive: true });
-        
+
         const filePath = path.join(invoiceDir, `${invoiceNumber}.pdf`);
         await generateInvoicePDF(invoiceData, filePath);
-        
+
         console.log('   ✅ Instant PDF Generated:', filePath);
 
-        // Serve directly or return URL
-        // Returning URL to keep consistency with other flows
-        const downloadToken = generateDownloadToken(invoiceNumber);
-        
         // Save to mock store so download link works
         if (!global.mockInvoices) global.mockInvoices = {};
         global.mockInvoices[invoiceNumber] = {
