@@ -5,6 +5,7 @@ import AISearchBar from './ai/AISearchBar';
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../app/context/AuthContext';
+import { useShop } from '../app/shop/context';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +16,7 @@ export default function Navbar({ dark = true }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const { user, logout } = useAuth();
+    const { cartCount } = useShop() || { cartCount: 0 };
     const pathname = usePathname();
     const isHome = pathname === '/';
     const profileRef = useRef(null);
@@ -58,6 +60,7 @@ export default function Navbar({ dark = true }) {
         { label: 'Explore', href: '/#explore', id: 'explore' },
         { label: 'Services', href: '/#plan-ahead', id: 'plan-ahead' },
         { label: 'Map', href: '/#explore-map', id: 'explore-map' },
+        { label: 'Shop', href: '/shop', id: 'shop' },
         { label: 'Events', href: '/#events', id: 'events' },
     ];
 
@@ -178,6 +181,26 @@ export default function Navbar({ dark = true }) {
                                     )}
                                 </AnimatePresence>
                             </div>
+
+                            {/* Cart Icon */}
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                <Link
+                                    href="/shop/cart"
+                                    className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-all ${isScrolled || !isHome
+                                        ? 'text-slate-600 bg-slate-100/80 hover:bg-slate-200'
+                                        : 'text-white bg-white/10 hover:bg-white/20'
+                                        }`}
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                                    </svg>
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-5 h-5 flex items-center justify-center bg-red-500 text-white text-xs font-bold rounded-full border-2 border-white">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
+                            </motion.div>
 
                             {/* Auth Section */}
                             {user ? (

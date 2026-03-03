@@ -2,6 +2,7 @@ import { Inter, Satisfy, Oswald, Poppins, Kaushan_Script, Playfair_Display } fro
 import "./globals.css";
 import "./polyfills";
 import { AuthProvider } from './context/AuthContext';
+import { ShopProvider } from './shop/context';
 import { Providers } from './providers';
 
 import AIAnalytics from '@/components/ai/AIAnalytics';
@@ -41,9 +42,11 @@ export default function RootLayout({ children }) {
       <body className={`${inter.variable} ${satisfy.variable} ${oswald.variable} ${poppins.variable} ${kaushanScript.variable} ${playfair.variable} ${poppins.className}`}>
         <Providers>
           <AuthProvider>
-            {children}
-            <Sidebar />
-            <FloatingAIButton />
+            <ShopProvider>
+              {children}
+              <Sidebar />
+              <FloatingAIButton />
+            </ShopProvider>
           </AuthProvider>
         </Providers>
       </body>

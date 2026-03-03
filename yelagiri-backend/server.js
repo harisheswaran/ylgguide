@@ -37,6 +37,7 @@ app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/guides', require('./routes/guideRoutes'));
 app.use('/api/transport', require('./routes/transportRoutes'));
 app.use('/api/packages', require('./routes/packageRoutes'));
+app.use('/api/shop', require('./routes/shopRoutes'));
 
 // Health check route
 app.get('/', (req, res) => {
