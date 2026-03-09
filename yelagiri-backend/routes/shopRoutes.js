@@ -5,7 +5,8 @@ const {
     getProducts,
     getProductById,
     createOrder,
-    getOrderById
+    getOrderById,
+    getOrdersByIds
 } = require('../controllers/shopController');
 
 // We might want to import auth middleware if needed
@@ -14,7 +15,8 @@ const {
 router.get('/categories', getCategories);
 router.get('/products', getProducts);
 router.get('/products/:id', getProductById);
-router.post('/orders', createOrder); // Add protect middleware later if strictly needed
+router.post('/orders/my-orders', getOrdersByIds); // Must be before :id route
+router.post('/orders', createOrder);
 router.get('/orders/:id', getOrderById);
 
 module.exports = router;

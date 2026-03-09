@@ -7,17 +7,28 @@ const ShopContext = createContext();
 export function ShopProvider({ children }) {
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
+    const [orderHistory, setOrderHistory] = useState([]);
 
     useEffect(() => {
         const savedCart = localStorage.getItem('ylg_shop_cart');
         if (savedCart) {
             setCart(JSON.parse(savedCart));
         }
+        const savedOrders = localStorage.getItem('ylg_shop_orders');
+        if (savedOrders) {
+            setOrderHistory(JSON.parse(savedOrders));
+        }
     }, []);
 
     useEffect(() => {
         localStorage.setItem('ylg_shop_cart', JSON.stringify(cart));
     }, [cart]);
+
+    useEffect(() => {
+        if (orderHistory.length > 0) {
+            localStorage.setItem('ylg_shop_orders', JSON.stringify(orderHistory));
+        }
+    }, [orderHistory]);
 
     const addToCart = (product, quantity = 1) => {
         setCart(prev => {
@@ -31,7 +42,7 @@ export function ShopProvider({ children }) {
             }
             return [...prev, { product, quantity }];
         });
-        setIsCartOpen(true); // Open cart sidebar/feedback
+        setIsCartOpen(true);
     };
 
     const removeFromCart = (productId) => {
@@ -50,6 +61,15 @@ export function ShopProvider({ children }) {
 
     const clearCart = () => setCart([]);
 
+    const addOrderToHistory = (orderId) => {
+        setOrderHistory(prev => {
+            if (prev.includes(orderId)) return prev;
+            const updated = [orderId, ...prev];
+            localStorage.setItem('ylg_shop_orders', JSON.stringify(updated));
+            return updated;
+        });
+    };
+
     const cartTotal = cart.reduce((total, item) => total + (item.product.price * item.quantity), 0);
     const cartCount = cart.reduce((count, item) => count + item.quantity, 0);
 
@@ -63,7 +83,9 @@ export function ShopProvider({ children }) {
             cartTotal,
             cartCount,
             isCartOpen,
-            setIsCartOpen
+            setIsCartOpen,
+            orderHistory,
+            addOrderToHistory
         }}>
             {children}
         </ShopContext.Provider>

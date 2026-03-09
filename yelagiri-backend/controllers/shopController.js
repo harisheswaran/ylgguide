@@ -119,10 +119,31 @@ const getOrderById = async (req, res) => {
     }
 };
 
+// @desc    Get multiple orders by IDs (for My Orders page)
+// @route   POST /api/shop/orders/my-orders
+// @access  Public
+const getOrdersByIds = async (req, res) => {
+    try {
+        const { orderIds } = req.body;
+
+        if (!orderIds || !Array.isArray(orderIds) || orderIds.length === 0) {
+            return res.json([]);
+        }
+
+        const orders = await ShopOrder.find({ _id: { $in: orderIds } })
+            .sort({ createdAt: -1 });
+
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     getCategories,
     getProducts,
     getProductById,
     createOrder,
-    getOrderById
+    getOrderById,
+    getOrdersByIds
 };

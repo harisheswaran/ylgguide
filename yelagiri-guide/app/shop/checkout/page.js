@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle, MapPin, Phone, User, Home, CreditCard } from 'lucide-react';
 
 export default function CheckoutPage() {
-    const { cart, cartTotal, clearCart } = useShop();
+    const { cart, cartTotal, clearCart, addOrderToHistory } = useShop();
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,6 +63,7 @@ export default function CheckoutPage() {
 
             if (res.ok) {
                 const data = await res.json();
+                addOrderToHistory(data._id);
                 clearCart();
                 router.push(`/shop/order/${data._id}`);
             } else {
