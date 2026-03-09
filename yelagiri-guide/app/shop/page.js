@@ -5,8 +5,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CategoryFilter from '@/components/shop/CategoryFilter';
 import ProductCard from '@/components/shop/ProductCard';
-import { Search, ShoppingBag, MapPin, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Search, ShoppingBag, ShoppingCart, MapPin, Loader2, Package } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useShop } from './context';
 
 export default function ShopPage() {
     const [categories, setCategories] = useState([]);
@@ -14,6 +16,7 @@ export default function ShopPage() {
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const { cartCount } = useShop();
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001';
 
@@ -66,23 +69,51 @@ export default function ShopPage() {
                     </p>
                 </motion.div>
 
-                {/* Search and Filter Section */}
+                {/* Search and Action Buttons */}
                 <div className="mb-8 space-y-6">
                     <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
                         <div className="relative w-full max-w-md">
                             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                             <input
                                 type="text"
-                                placeholder="Search interactions, spices, honey..."
+                                placeholder="Search products, spices, honey..."
                                 className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#1F3D2B]/50 transition-all shadow-sm"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
 
-                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
-                            <MapPin className="w-4 h-4 text-[#BFA76A]" />
-                            <span>Delivering to <span className="font-semibold text-gray-800">Yelagiri Hills</span></span>
+                        <div className="flex items-center gap-3">
+                            {/* My Orders Button */}
+                            <Link
+                                href="/shop/my-orders"
+                                className="flex items-center gap-2 px-5 py-2.5 bg-white text-[#1F3D2B] font-semibold rounded-full shadow-sm border border-gray-200 hover:border-[#1F3D2B]/30 hover:shadow-md transition-all active:scale-95"
+                                id="my-orders-btn"
+                            >
+                                <Package className="w-4 h-4" />
+                                <span className="text-sm">My Orders</span>
+                            </Link>
+
+                            {/* Cart Button */}
+                            <Link
+                                href="/shop/cart"
+                                className="relative flex items-center gap-2 px-5 py-2.5 bg-[#1F3D2B] text-white font-semibold rounded-full shadow-md hover:bg-[#2F5D4B] transition-all active:scale-95"
+                                id="cart-btn"
+                            >
+                                <ShoppingCart className="w-4 h-4" />
+                                <span className="text-sm">Cart</span>
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full shadow-lg animate-bounce">
+                                        {cartCount}
+                                    </span>
+                                )}
+                            </Link>
+
+                            {/* Location Indicator */}
+                            <div className="hidden md:flex items-center gap-2 text-sm text-gray-600 bg-white px-4 py-2.5 rounded-full shadow-sm border border-gray-100">
+                                <MapPin className="w-4 h-4 text-[#BFA76A]" />
+                                <span>Delivering to <span className="font-semibold text-gray-800">Yelagiri Hills</span></span>
+                            </div>
                         </div>
                     </div>
 
